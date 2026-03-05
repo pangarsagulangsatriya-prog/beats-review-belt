@@ -420,7 +420,7 @@ const HazardTable = () => {
       </div>
 
       <div className="mb-3">
-        <DateFilter dateRange={dateRange} onDateRangeChange={setDateRange} />
+        <DateFilter dateRange={dateRange} onDateRangeChange={setDateRange} onOpenAnalytics={() => setAnalyticsOpen(true)} />
       </div>
 
       <FilterBar
@@ -430,8 +430,6 @@ const HazardTable = () => {
         onFiltersChange={setFilters}
         filterOptions={filterOptions}
       />
-
-      <QuickAnalytics data={filtered} onOpenDrawer={() => setAnalyticsOpen(true)} />
 
       <AnalyticsDrawer
         open={analyticsOpen}
