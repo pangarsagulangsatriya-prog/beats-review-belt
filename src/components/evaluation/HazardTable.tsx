@@ -6,6 +6,10 @@ import AnnotationPopover from "./AnnotationPopover";
 import FilterBar, { ColumnFilters, emptyFilters } from "./FilterBar";
 import TaskDrawer from "./TaskDrawer";
 import LabelColumnHeader, { LabelFilterValue, LabelSortValue } from "./LabelColumnHeader";
+import DateFilter, { DateRange } from "./DateFilter";
+import QuickAnalytics from "./QuickAnalytics";
+import AnalyticsDrawer from "./AnalyticsDrawer";
+import { startOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -88,7 +92,11 @@ const COLUMNS = [
 
 const PAGE_SIZE = 10;
 
-const HazardTable = () => {
+  const [dateRange, setDateRange] = useState<DateRange>({
+    from: startOfDay(new Date()),
+    to: startOfDay(new Date()),
+  });
+  const [analyticsOpen, setAnalyticsOpen] = useState(false);
   const [hazards, setHazards] = useState<HazardTask[]>(mockHazards);
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState<ColumnFilters>(emptyFilters);
@@ -410,12 +418,27 @@ const HazardTable = () => {
         <span className="text-[10px] text-muted-foreground">{filtered.length} tasks</span>
       </div>
 
+      <div className="mb-3">
+        <DateFilter dateRange={dateRange} onDateRangeChange={setDateRange} />
+      </div>
+
       <FilterBar
         search={search}
         onSearchChange={setSearch}
         filters={filters}
         onFiltersChange={setFilters}
         filterOptions={filterOptions}
+      />
+
+      <QuickAnalytics data={filtered} onOpenDrawer={() => setAnalyticsOpen(true)} />
+
+      <AnalyticsDrawer
+        open={analyticsOpen}
+        onClose={() => setAnalyticsOpen(false)}
+        allData={hazards}
+        filteredData={filtered}
+        dateRange={dateRange}
+        filters={filters}
       />
 
       {/* Formula Bar */}
