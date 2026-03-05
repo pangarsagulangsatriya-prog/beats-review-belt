@@ -92,6 +92,7 @@ const COLUMNS = [
 
 const PAGE_SIZE = 10;
 
+const HazardTable = () => {
   const [dateRange, setDateRange] = useState<DateRange>({
     from: startOfDay(new Date()),
     to: startOfDay(new Date()),
