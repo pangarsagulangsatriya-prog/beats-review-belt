@@ -50,13 +50,17 @@ function getFinalLabel(label: AILabel): string | null {
   return label.human_label || label.ai_label || null;
 }
 
-function getDatePresets(): DatePreset[] {
+function getAnalyticsDatePresets(): DatePreset[] {
   const today = startOfDay(new Date());
   return [
     { label: "Hari ini", from: today, to: today },
     { label: "1 hari lalu", from: subDays(today, 1), to: subDays(today, 1) },
     { label: "2 hari lalu", from: subDays(today, 2), to: subDays(today, 2) },
     { label: "3 hari lalu", from: subDays(today, 3), to: subDays(today, 3) },
+    { label: "4 hari lalu", from: subDays(today, 4), to: subDays(today, 4) },
+    { label: "5 hari lalu", from: subDays(today, 5), to: subDays(today, 5) },
+    { label: "6 hari lalu", from: subDays(today, 6), to: subDays(today, 6) },
+    { label: "7 hari lalu", from: subDays(today, 7), to: subDays(today, 7) },
   ];
 }
 
@@ -327,27 +331,12 @@ function AnalyticsMultiSelect({ label, options, selected, onChange }: {
 /** Date filter inside analytics — matches main page scheme */
 function AnalyticsDateFilter({ dateRange, onChange }: { dateRange: DateRange; onChange: (r: DateRange) => void }) {
   const [open, setOpen] = useState(false);
-  const [showCustom, setShowCustom] = useState(false);
-  const [customFrom, setCustomFrom] = useState<Date | undefined>(dateRange.from);
-  const [customTo, setCustomTo] = useState<Date | undefined>(dateRange.to);
-  const presets = getDatePresets();
+  const presets = getAnalyticsDatePresets();
   const activePreset = presets.find(p => dateRangesEqual(p, dateRange));
-  const isCustom = !activePreset;
 
   const handlePreset = (p: DatePreset) => {
     onChange({ from: p.from, to: p.to });
     setOpen(false);
-    setShowCustom(false);
-  };
-
-  const applyCustom = () => {
-    if (customFrom && customTo) {
-      const from = customFrom < customTo ? customFrom : customTo;
-      const to = customFrom < customTo ? customTo : customFrom;
-      onChange({ from: startOfDay(from), to: startOfDay(to) });
-      setOpen(false);
-      setShowCustom(false);
-    }
   };
 
   return (
@@ -360,75 +349,39 @@ function AnalyticsDateFilter({ dateRange, onChange }: { dateRange: DateRange; on
         )}>
           <CalendarDays className="w-3.5 h-3.5 text-muted-foreground" />
           <span className={cn("font-semibold", activePreset ? "text-primary" : "text-foreground")}>
-            {activePreset ? activePreset.label : "Custom"}
+            {activePreset ? activePreset.label : formatDateCompact(dateRange)}
           </span>
           <span className="text-muted-foreground text-[10px]">{formatDateCompact(dateRange)}</span>
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0 rounded-xl shadow-lg border-border" align="start" sideOffset={6}>
-        <div className="flex">
-          {/* Presets */}
-          <div className="py-2 min-w-[180px]">
-            {presets.map((p) => (
-              <button
-                key={p.label}
-                onClick={() => handlePreset(p)}
-                className={cn(
-                  "flex items-center justify-between w-full px-4 py-2.5 text-left transition-colors",
-                  activePreset?.label === p.label ? "bg-primary/5" : "hover:bg-muted"
-                )}
-              >
-                <div className="flex items-center gap-3">
-                  <CalendarDays className={cn("w-4 h-4", activePreset?.label === p.label ? "text-primary" : "text-muted-foreground")} />
-                  <div>
-                    <div className={cn("text-sm font-medium", activePreset?.label === p.label ? "text-primary" : "text-foreground")}>{p.label}</div>
-                    <div className="text-[11px] text-muted-foreground">{format(p.from, "dd MMM yyyy", { locale: localeId })}</div>
-                  </div>
-                </div>
-                {activePreset?.label === p.label && <Check className="w-4 h-4 text-primary" />}
-              </button>
-            ))}
-            {/* Custom */}
+        <div className="py-2 min-w-[200px] max-h-[360px] overflow-auto">
+          {presets.map((p) => (
             <button
-              onClick={() => { setShowCustom(true); setCustomFrom(dateRange.from); setCustomTo(dateRange.to); }}
+              key={p.label}
+              onClick={() => handlePreset(p)}
               className={cn(
-                "flex items-center w-full px-4 py-2.5 text-left transition-colors border-t border-border",
-                isCustom ? "bg-primary/5" : "hover:bg-muted"
+                "flex items-center justify-between w-full px-4 py-2 text-left transition-colors",
+                activePreset?.label === p.label ? "bg-primary/5" : "hover:bg-muted"
               )}
             >
               <div className="flex items-center gap-3">
-                <CalendarDays className={cn("w-4 h-4", isCustom ? "text-primary" : "text-muted-foreground")} />
-                <div className={cn("text-sm font-medium", isCustom ? "text-primary" : "text-foreground")}>Custom…</div>
+                <CalendarDays className={cn("w-4 h-4", activePreset?.label === p.label ? "text-primary" : "text-muted-foreground")} />
+                <div>
+                  <div className={cn("text-sm font-medium", activePreset?.label === p.label ? "text-primary" : "text-foreground")}>{p.label}</div>
+                  <div className="text-[11px] text-muted-foreground">{format(p.from, "dd MMM yyyy", { locale: localeId })}</div>
+                </div>
               </div>
+              {activePreset?.label === p.label && <Check className="w-4 h-4 text-primary" />}
             </button>
-            {/* Timezone */}
-            <div className="px-4 pt-3 pb-1 border-t border-border mt-1">
-              <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                <Clock className="w-3 h-3" />
-                <span>WIB (UTC+7)</span>
-              </div>
+          ))}
+          {/* Timezone */}
+          <div className="px-4 pt-3 pb-1 border-t border-border mt-1">
+            <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+              <Clock className="w-3 h-3" />
+              <span>WIB (UTC+7)</span>
             </div>
           </div>
-          {/* Custom calendar */}
-          {showCustom && (
-            <div className="p-3 border-l border-border">
-              <p className="text-xs font-semibold text-foreground mb-2">Pilih Rentang Tanggal</p>
-              <div className="flex gap-2">
-                <div>
-                  <p className="text-[10px] text-muted-foreground mb-1">Dari</p>
-                  <Calendar mode="single" selected={customFrom} onSelect={(d) => d && setCustomFrom(d)} className="p-2 pointer-events-auto" initialFocus />
-                </div>
-                <div>
-                  <p className="text-[10px] text-muted-foreground mb-1">Sampai</p>
-                  <Calendar mode="single" selected={customTo} onSelect={(d) => d && setCustomTo(d)} className="p-2 pointer-events-auto" />
-                </div>
-              </div>
-              <div className="flex justify-end gap-2 mt-2">
-                <button onClick={() => setShowCustom(false)} className="px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">Batal</button>
-                <button onClick={applyCustom} disabled={!customFrom || !customTo} className="px-4 py-1.5 text-xs font-medium bg-primary text-primary-foreground rounded-full transition-colors hover:bg-primary/90 disabled:opacity-40">Terapkan</button>
-              </div>
-            </div>
-          )}
         </div>
       </PopoverContent>
     </Popover>
