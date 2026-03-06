@@ -7,7 +7,6 @@ import FilterBar, { ColumnFilters, emptyFilters } from "./FilterBar";
 import TaskDrawer from "./TaskDrawer";
 import LabelColumnHeader, { LabelFilterValue, LabelSortValue } from "./LabelColumnHeader";
 import DateFilter, { DateRange } from "./DateFilter";
-import QuickAnalytics from "./QuickAnalytics";
 import AnalyticsDrawer from "./AnalyticsDrawer";
 import { startOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -419,16 +418,14 @@ const HazardTable = () => {
         <span className="text-[10px] text-muted-foreground">{filtered.length} tasks</span>
       </div>
 
-      <div className="mb-3">
-        <DateFilter dateRange={dateRange} onDateRangeChange={setDateRange} onOpenAnalytics={() => setAnalyticsOpen(true)} />
-      </div>
-
       <FilterBar
         search={search}
         onSearchChange={setSearch}
         filters={filters}
         onFiltersChange={setFilters}
         filterOptions={filterOptions}
+        dateFilter={<DateFilter dateRange={dateRange} onDateRangeChange={setDateRange} />}
+        onOpenAnalytics={() => setAnalyticsOpen(true)}
       />
 
       <AnalyticsDrawer
