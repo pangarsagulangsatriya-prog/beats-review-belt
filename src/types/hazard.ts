@@ -58,6 +58,7 @@ export interface HazardTask {
   id: string;
   timestamp: string;
   pic_perusahaan: string;
+  pic_name: string;
   site: string;
   lokasi: string;
   detail_location: string;

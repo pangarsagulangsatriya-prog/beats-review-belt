@@ -460,7 +460,7 @@ const HazardTable = () => {
             <span className="text-foreground flex-1 min-w-0 truncate text-[11px]">{String(activeRow[formulaField.key])}</span>
           </div>
           <div className="flex items-center gap-1.5 shrink-0 text-[10px] text-muted-foreground">
-            <span>{activeRow.pic_perusahaan}</span>
+            <span>{activeRow.pic_perusahaan} – {activeRow.pic_name}</span>
             <span className="text-border">·</span>
             <span>{activeRow.site}</span>
             <span className="text-border">·</span>
@@ -591,7 +591,10 @@ const HazardTable = () => {
                       {h.timestamp}
                     </td>
                     <td className={cellClass(2)} onClick={(e) => { e.stopPropagation(); toggleActiveRow(h.id); setActiveColIdx(2); }}>
-                      {expanded ? <span className="text-foreground">{h.pic_perusahaan}</span> : <TruncatedCell text={h.pic_perusahaan} />}
+                      <div className="flex flex-col leading-tight">
+                        <span className={cn("text-[11px] font-medium text-foreground", !expanded && "truncate max-w-[130px]")}>{h.pic_perusahaan}</span>
+                        <span className={cn("text-[10px] font-normal text-muted-foreground", !expanded && "truncate max-w-[130px]")}>{h.pic_name}</span>
+                      </div>
                     </td>
                     <td className={cn(cellClass(3), "text-foreground")} onClick={(e) => { e.stopPropagation(); toggleActiveRow(h.id); setActiveColIdx(3); }}>
                       {h.site}
