@@ -81,9 +81,6 @@ const AIBadge = ({ label, onClick, slaDeadline, disabled, editingBy, fieldType =
                 <span className="truncate font-medium text-left flex-1">{topLines?.primary || displayLabel}</span>
                 <Lock className="w-3 h-3 text-primary shrink-0" />
               </div>
-              {topLines?.secondary && (
-                <span className="text-[9px] text-muted-foreground pl-[26px] truncate block w-full text-left">{topLines.secondary}</span>
-              )}
               <span className="text-[9px] text-muted-foreground pl-[26px]">Auto-confirmed · {relevance}%</span>
             </div>
           </TooltipTrigger>
@@ -116,9 +113,6 @@ const AIBadge = ({ label, onClick, slaDeadline, disabled, editingBy, fieldType =
                 <span className="truncate font-medium text-left flex-1">{topLines?.primary || displayLabel}</span>
                 <Lock className="w-3 h-3 text-primary shrink-0" />
               </div>
-              {topLines?.secondary && (
-                <span className="text-[9px] text-muted-foreground pl-[18px] truncate block w-full text-left">{topLines.secondary}</span>
-              )}
               <span className="text-[9px] text-muted-foreground pl-[18px]">Annotated by Human</span>
             </div>
           </TooltipTrigger>
@@ -176,9 +170,6 @@ const AIBadge = ({ label, onClick, slaDeadline, disabled, editingBy, fieldType =
               <span className="truncate font-medium text-left flex-1">{topLines?.primary || displayLabel}</span>
               <SquarePen className="w-3 h-3 text-muted-foreground/40 shrink-0" />
             </div>
-            {topLines?.secondary && (
-              <span className="text-[9px] text-muted-foreground pl-[26px] truncate block w-full text-left">{topLines.secondary}</span>
-            )}
             <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground pl-[26px]">
               <span>{relevance}%</span>
               {slaDeadline && (

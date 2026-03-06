@@ -5,7 +5,7 @@ import { id as localeId } from "date-fns/locale";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { BarChart3 } from "lucide-react";
+
 
 export interface DateRange {
   from: Date;
@@ -15,7 +15,6 @@ export interface DateRange {
 interface DateFilterProps {
   dateRange: DateRange;
   onDateRangeChange: (range: DateRange) => void;
-  onOpenAnalytics: () => void;
 }
 
 type PresetKey = "today" | "yesterday" | "2days" | "3days" | "custom";
@@ -51,7 +50,7 @@ function formatPresetDate(daysAgo: number): string {
   return format(d, "dd MMM yyyy", { locale: localeId });
 }
 
-const DateFilter = ({ dateRange, onDateRangeChange, onOpenAnalytics }: DateFilterProps) => {
+const DateFilter = ({ dateRange, onDateRangeChange }: DateFilterProps) => {
   const [open, setOpen] = useState(false);
   const [showCustom, setShowCustom] = useState(false);
   const [customFrom, setCustomFrom] = useState<Date | undefined>(dateRange.from);
@@ -81,154 +80,142 @@ const DateFilter = ({ dateRange, onDateRangeChange, onOpenAnalytics }: DateFilte
   };
 
   return (
-    <div className="flex items-center gap-2">
-      {/* Date Picker - Airbnb style */}
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <button
-            className={cn(
-              "inline-flex items-center gap-2 px-3 py-2 rounded-full border text-xs font-medium transition-all",
-              "border-border bg-card text-foreground hover:shadow-sm hover:border-foreground/20",
-              activePreset === "today" && "border-primary/30"
-            )}
-          >
-            <CalendarIcon className="w-3.5 h-3.5 text-muted-foreground" />
-            <span className={cn(
-              "font-semibold",
-              activePreset === "today" ? "text-primary" : "text-foreground"
-            )}>
-              {activePreset === "today" ? "Hari ini" : activePreset ? PRESETS.find(p => p.key === activePreset)?.label : "Custom"}
-            </span>
-            <span className="text-muted-foreground">{formatDateLabel(dateRange)}</span>
-          </button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0 rounded-xl shadow-lg border-border" align="start" sideOffset={6}>
-          <div className="flex">
-            {/* Presets list */}
-            <div className="py-2 min-w-[180px]">
-              {PRESETS.map((p) => (
-                <button
-                  key={p.key}
-                  onClick={() => handlePreset(p.key)}
-                  className={cn(
-                    "flex items-center justify-between w-full px-4 py-2.5 text-left transition-colors",
-                    activePreset === p.key
-                      ? "bg-primary/5"
-                      : "hover:bg-muted"
-                  )}
-                >
-                  <div className="flex items-center gap-3">
-                    <CalendarIcon className={cn(
-                      "w-4 h-4",
-                      activePreset === p.key ? "text-primary" : "text-muted-foreground"
-                    )} />
-                    <div>
-                      <div className={cn(
-                        "text-sm font-medium",
-                        activePreset === p.key ? "text-primary" : "text-foreground"
-                      )}>
-                        {p.label}
-                      </div>
-                      <div className="text-[11px] text-muted-foreground">
-                        {formatPresetDate(p.daysAgo)}
-                      </div>
-                    </div>
-                  </div>
-                  {activePreset === p.key && (
-                    <Check className="w-4 h-4 text-primary" />
-                  )}
-                </button>
-              ))}
-              {/* Custom option */}
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          className={cn(
+            "inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-[11px] font-medium transition-all",
+            "border-border bg-card text-foreground hover:shadow-sm hover:border-foreground/20",
+            activePreset === "today" && "border-primary/30"
+          )}
+        >
+          <CalendarIcon className="w-3.5 h-3.5 text-muted-foreground" />
+          <span className={cn(
+            "font-semibold",
+            activePreset === "today" ? "text-primary" : "text-foreground"
+          )}>
+            {activePreset === "today" ? "Hari ini" : activePreset ? PRESETS.find(p => p.key === activePreset)?.label : "Custom"}
+          </span>
+          <span className="text-muted-foreground text-[10px]">{formatDateLabel(dateRange)}</span>
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0 rounded-xl shadow-lg border-border" align="start" sideOffset={6}>
+        <div className="flex">
+          {/* Presets list */}
+          <div className="py-2 min-w-[180px]">
+            {PRESETS.map((p) => (
               <button
-                onClick={() => {
-                  setShowCustom(true);
-                  setCustomFrom(dateRange.from);
-                  setCustomTo(dateRange.to);
-                }}
+                key={p.key}
+                onClick={() => handlePreset(p.key)}
                 className={cn(
-                  "flex items-center w-full px-4 py-2.5 text-left transition-colors border-t border-border",
-                  activePreset === null ? "bg-primary/5" : "hover:bg-muted"
+                  "flex items-center justify-between w-full px-4 py-2.5 text-left transition-colors",
+                  activePreset === p.key
+                    ? "bg-primary/5"
+                    : "hover:bg-muted"
                 )}
               >
                 <div className="flex items-center gap-3">
                   <CalendarIcon className={cn(
                     "w-4 h-4",
-                    activePreset === null ? "text-primary" : "text-muted-foreground"
+                    activePreset === p.key ? "text-primary" : "text-muted-foreground"
                   )} />
                   <div>
                     <div className={cn(
                       "text-sm font-medium",
-                      activePreset === null ? "text-primary" : "text-foreground"
+                      activePreset === p.key ? "text-primary" : "text-foreground"
                     )}>
-                      Custom…
+                      {p.label}
+                    </div>
+                    <div className="text-[11px] text-muted-foreground">
+                      {formatPresetDate(p.daysAgo)}
                     </div>
                   </div>
                 </div>
+                {activePreset === p.key && (
+                  <Check className="w-4 h-4 text-primary" />
+                )}
               </button>
-              {/* Timezone */}
-              <div className="px-4 pt-3 pb-1 border-t border-border mt-1">
-                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                  <Clock className="w-3 h-3" />
-                  <span>WIB (UTC+7)</span>
+            ))}
+            {/* Custom option */}
+            <button
+              onClick={() => {
+                setShowCustom(true);
+                setCustomFrom(dateRange.from);
+                setCustomTo(dateRange.to);
+              }}
+              className={cn(
+                "flex items-center w-full px-4 py-2.5 text-left transition-colors border-t border-border",
+                activePreset === null ? "bg-primary/5" : "hover:bg-muted"
+              )}
+            >
+              <div className="flex items-center gap-3">
+                <CalendarIcon className={cn(
+                  "w-4 h-4",
+                  activePreset === null ? "text-primary" : "text-muted-foreground"
+                )} />
+                <div>
+                  <div className={cn(
+                    "text-sm font-medium",
+                    activePreset === null ? "text-primary" : "text-foreground"
+                  )}>
+                    Custom…
+                  </div>
                 </div>
+              </div>
+            </button>
+            {/* Timezone */}
+            <div className="px-4 pt-3 pb-1 border-t border-border mt-1">
+              <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                <Clock className="w-3 h-3" />
+                <span>WIB (UTC+7)</span>
               </div>
             </div>
-            {/* Custom calendar */}
-            {showCustom && (
-              <div className="p-3 border-l border-border">
-                <p className="text-xs font-semibold text-foreground mb-2">Pilih Rentang Tanggal</p>
-                <div className="flex gap-2">
-                  <div>
-                    <p className="text-[10px] text-muted-foreground mb-1">Dari</p>
-                    <Calendar
-                      mode="single"
-                      selected={customFrom}
-                      onSelect={(d) => d && setCustomFrom(d)}
-                      className="p-2 pointer-events-auto"
-                      initialFocus
-                    />
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-muted-foreground mb-1">Sampai</p>
-                    <Calendar
-                      mode="single"
-                      selected={customTo}
-                      onSelect={(d) => d && setCustomTo(d)}
-                      className="p-2 pointer-events-auto"
-                    />
-                  </div>
+          </div>
+          {/* Custom calendar */}
+          {showCustom && (
+            <div className="p-3 border-l border-border">
+              <p className="text-xs font-semibold text-foreground mb-2">Pilih Rentang Tanggal</p>
+              <div className="flex gap-2">
+                <div>
+                  <p className="text-[10px] text-muted-foreground mb-1">Dari</p>
+                  <Calendar
+                    mode="single"
+                    selected={customFrom}
+                    onSelect={(d) => d && setCustomFrom(d)}
+                    className="p-2 pointer-events-auto"
+                    initialFocus
+                  />
                 </div>
-                <div className="flex justify-end gap-2 mt-2">
-                  <button
-                    onClick={() => setShowCustom(false)}
-                    className="px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    Batal
-                  </button>
-                  <button
-                    onClick={applyCustom}
-                    disabled={!customFrom || !customTo}
-                    className="px-4 py-1.5 text-xs font-medium bg-primary text-primary-foreground rounded-full transition-colors hover:bg-primary/90 disabled:opacity-40"
-                  >
-                    Terapkan
-                  </button>
+                <div>
+                  <p className="text-[10px] text-muted-foreground mb-1">Sampai</p>
+                  <Calendar
+                    mode="single"
+                    selected={customTo}
+                    onSelect={(d) => d && setCustomTo(d)}
+                    className="p-2 pointer-events-auto"
+                  />
                 </div>
               </div>
-            )}
-          </div>
-        </PopoverContent>
-      </Popover>
-
-      {/* Analytics button - inline with date */}
-      <button
-        onClick={onOpenAnalytics}
-        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full border border-border bg-card text-xs font-medium text-foreground hover:shadow-sm hover:border-foreground/20 transition-all"
-      >
-        <BarChart3 className="w-3.5 h-3.5 text-muted-foreground" />
-        Lihat Analytics
-      </button>
-    </div>
+              <div className="flex justify-end gap-2 mt-2">
+                <button
+                  onClick={() => setShowCustom(false)}
+                  className="px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={applyCustom}
+                  disabled={!customFrom || !customTo}
+                  className="px-4 py-1.5 text-xs font-medium bg-primary text-primary-foreground rounded-full transition-colors hover:bg-primary/90 disabled:opacity-40"
+                >
+                  Terapkan
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 };
 

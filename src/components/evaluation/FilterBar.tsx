@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from "react";
-import { Search, X, ChevronDown, MapPin, Navigation, Compass, Tag, Layers, FolderTree, Building2, MapPinned } from "lucide-react";
+import { useState, useRef, useEffect, ReactNode } from "react";
+import { Search, X, ChevronDown, MapPin, Navigation, Compass, Tag, Layers, FolderTree, Building2, MapPinned, BarChart3 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
@@ -37,6 +37,8 @@ interface FilterBarProps {
     psppLabels: string[];
     grLabels: string[];
   };
+  dateFilter?: ReactNode;
+  onOpenAnalytics?: () => void;
 }
 
 const FILTER_ICONS: Record<string, React.ReactNode> = {
@@ -51,7 +53,7 @@ const FILTER_ICONS: Record<string, React.ReactNode> = {
   GR: <Tag className="w-3 h-3" />,
 };
 
-const FilterBar = ({ search, onSearchChange, filters, onFiltersChange, filterOptions }: FilterBarProps) => {
+const FilterBar = ({ search, onSearchChange, filters, onFiltersChange, filterOptions, dateFilter, onOpenAnalytics }: FilterBarProps) => {
   const activeCount = [
     ...filters.site, ...filters.lokasi, ...filters.detail_location, ...filters.ketidaksesuaian, ...filters.sub_ketidaksesuaian,
     ...filters.pic_perusahaan, ...filters.tbc, ...filters.pspp, ...filters.gr,
@@ -60,16 +62,25 @@ const FilterBar = ({ search, onSearchChange, filters, onFiltersChange, filterOpt
   const clearAll = () => onFiltersChange(emptyFilters);
 
   return (
-    <div className="flex items-center gap-3 mb-4 flex-wrap">
+    <div className="flex items-center gap-2 mb-4 flex-wrap">
+      {/* Date filter */}
+      {dateFilter}
+
+      {/* Divider */}
+      <div className="h-5 w-px bg-border shrink-0" />
+
+      {/* Search */}
       <div className="relative shrink-0">
         <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
         <Input
           placeholder="Search Task ID..."
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="pl-8 h-8 w-48 text-xs"
+          className="pl-8 h-7 w-44 text-[11px] rounded-full border-border"
         />
       </div>
+
+      {/* Column filters */}
       <div className="flex items-center gap-1.5 flex-wrap flex-1">
         <MultiSelectFilter label="PIC Perusahaan" icon={FILTER_ICONS["PIC Perusahaan"]} options={filterOptions.pic_perusahaan} selected={filters.pic_perusahaan}
           onChange={(v) => onFiltersChange({ ...filters, pic_perusahaan: v })} />
@@ -90,11 +101,22 @@ const FilterBar = ({ search, onSearchChange, filters, onFiltersChange, filterOpt
         <MultiSelectFilter label="GR" icon={FILTER_ICONS.GR} options={filterOptions.grLabels} selected={filters.gr}
           onChange={(v) => onFiltersChange({ ...filters, gr: v })} />
         {activeCount > 0 && (
-          <button onClick={clearAll} className="inline-flex items-center gap-1 px-2 py-1.5 text-[11px] text-destructive hover:text-destructive/80 transition-colors">
+          <button onClick={clearAll} className="inline-flex items-center gap-1 px-2 py-1 text-[11px] text-destructive hover:text-destructive/80 transition-colors">
             <X className="w-3 h-3" /> Clear ({activeCount})
           </button>
         )}
       </div>
+
+      {/* Analytics button - far right */}
+      {onOpenAnalytics && (
+        <button
+          onClick={onOpenAnalytics}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border bg-card text-[11px] font-medium text-foreground hover:shadow-sm hover:border-foreground/20 transition-all shrink-0 ml-auto"
+        >
+          <BarChart3 className="w-3.5 h-3.5 text-muted-foreground" />
+          Analytics
+        </button>
+      )}
     </div>
   );
 };
@@ -136,13 +158,13 @@ function MultiSelectFilter({ label, icon, options, selected, onChange }: {
       <button
         onClick={() => { setOpen(!open); setQuery(""); }}
         className={cn(
-          "inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded border text-[11px] font-medium transition-colors",
-          hasSelected ? "border-primary/30 bg-primary/5 text-primary" : "border-border text-foreground hover:bg-muted"
+          "inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border text-[11px] font-medium transition-all",
+          hasSelected ? "border-primary/30 bg-primary/5 text-primary hover:shadow-sm" : "border-border text-foreground hover:bg-muted hover:shadow-sm"
         )}
       >
         {icon}
         {label}{hasSelected && ` (${selected.length})`}
-        <ChevronDown className="w-3 h-3 text-muted-foreground" />
+        <ChevronDown className={cn("w-3 h-3 transition-transform", open && "rotate-180")} />
       </button>
       {open && (
         <div className="absolute top-full left-0 mt-1 z-[60] bg-popover border border-border rounded-lg shadow-xl w-56 overflow-hidden">
