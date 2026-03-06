@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
-import { X, Download, BarChart3, Info, Search, ChevronDown, CalendarDays, RotateCcw, ArrowRightToLine, Check } from "lucide-react";
+import { X, BarChart3, Info, Search, ChevronDown, CalendarDays, RotateCcw, ArrowRightToLine, Check, TrendingUp, Clock, CheckCircle2 } from "lucide-react";
 import { HazardTask, AILabel } from "@/types/hazard";
 import { ColumnFilters, emptyFilters } from "./FilterBar";
 import { DateRange } from "./DateFilter";
@@ -28,27 +28,21 @@ type DatePreset = { label: string; from: Date; to: Date };
 
 // ─── Constants ──────────────────────────────────────────────
 const PIE_COLORS = [
-  "hsl(215, 55%, 45%)",
-  "hsl(152, 42%, 40%)",
-  "hsl(38, 60%, 50%)",
-  "hsl(0, 55%, 50%)",
-  "hsl(270, 35%, 52%)",
-  "hsl(180, 40%, 42%)",
-  "hsl(330, 45%, 48%)",
-  "hsl(60, 45%, 42%)",
-  "hsl(200, 40%, 50%)",
-  "hsl(100, 35%, 42%)",
+  "hsl(var(--primary))",
+  "hsl(152, 45%, 42%)",
+  "hsl(38, 62%, 50%)",
+  "hsl(0, 52%, 52%)",
+  "hsl(270, 38%, 54%)",
+  "hsl(180, 42%, 44%)",
+  "hsl(330, 45%, 50%)",
+  "hsl(200, 44%, 50%)",
 ];
 
-const OTHERS_COLOR = "hsl(220, 10%, 75%)";
+const OTHERS_COLOR = "hsl(var(--muted-foreground) / 0.3)";
 
 // ─── Helpers ────────────────────────────────────────────────
 function isFinal(label: AILabel): boolean {
   return label.locked || label.auto_confirmed;
-}
-
-function isWaiting(label: AILabel): boolean {
-  return !isFinal(label);
 }
 
 function getFinalLabel(label: AILabel): string | null {
@@ -105,15 +99,12 @@ function computeFinalDistribution(data: HazardTask[], field: "tbc" | "pspp" | "g
     }
   }
 
-  // Add Non-* entry
   if (waitingCount > 0) {
     labelMap.set(`Non-${fieldName}`, waitingCount);
   }
 
-  const sorted = [...labelMap.entries()]
-    .sort((a, b) => b[1] - a[1]);
+  const sorted = [...labelMap.entries()].sort((a, b) => b[1] - a[1]);
 
-  // If too many, group into Others
   const MAX_SLICES = 7;
   let pieData: { name: string; value: number; isOthers?: boolean }[];
   if (sorted.length <= MAX_SLICES) {
@@ -136,26 +127,9 @@ function computeFinalDistribution(data: HazardTask[], field: "tbc" | "pspp" | "g
   return { pieData, tableData, finalCount, waitingCount, total: data.length };
 }
 
-function exportCSV(data: HazardTask[]) {
-  const rows = data.map(h => ({
-    id: h.id, timestamp: h.timestamp, site: h.site, lokasi: h.lokasi,
-    pic_perusahaan: h.pic_perusahaan, status: h.status,
-    tbc: h.tbc.human_label || h.tbc.ai_label || "",
-    pspp: h.pspp.human_label || h.pspp.ai_label || "",
-    gr: h.gr.human_label || h.gr.ai_label || "",
-  }));
-  const headers = Object.keys(rows[0] || {});
-  const csv = [headers.join(","), ...rows.map(r => headers.map(h => `"${String((r as any)[h]).replace(/"/g, '""')}"`).join(","))].join("\n");
-  const blob = new Blob([csv], { type: "text/csv" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url; a.download = `analytics-${format(new Date(), "yyyy-MM-dd")}.csv`;
-  a.click(); URL.revokeObjectURL(url);
-}
-
 // ─── Sub-components ─────────────────────────────────────────
 
-/** Ratio bar: Waiting vs Final */
+/** Ratio bar: Waiting vs Final — Mixpanel style */
 const RatioBar = ({ waiting, final: finalVal }: { waiting: number; final: number }) => {
   const total = waiting + finalVal;
   if (total === 0) return null;
@@ -166,27 +140,41 @@ const RatioBar = ({ waiting, final: finalVal }: { waiting: number; final: number
     <TooltipProvider delayDuration={200}>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className="mt-2">
-            <div className="flex h-2 rounded-full overflow-hidden bg-muted">
-              <div
-                className="h-full transition-all"
-                style={{ width: `${waitingPct}%`, backgroundColor: "hsl(220, 12%, 72%)" }}
-              />
-              <div
-                className="h-full transition-all"
-                style={{ width: `${finalPct}%`, backgroundColor: "hsl(215, 55%, 45%)" }}
-              />
+          <div className="mt-3 space-y-1.5">
+            <div className="flex h-[6px] rounded-full overflow-hidden bg-secondary">
+              {waitingPct > 0 && (
+                <div
+                  className="h-full transition-all duration-500 rounded-l-full"
+                  style={{ width: `${waitingPct}%`, backgroundColor: "hsl(var(--muted-foreground) / 0.25)" }}
+                />
+              )}
+              {finalPct > 0 && (
+                <div
+                  className="h-full transition-all duration-500"
+                  style={{
+                    width: `${finalPct}%`,
+                    backgroundColor: "hsl(var(--primary))",
+                    borderRadius: waitingPct === 0 ? "9999px" : "0 9999px 9999px 0",
+                  }}
+                />
+              )}
             </div>
-            <div className="flex justify-between mt-1 text-[9px] text-muted-foreground">
-              <span>Menunggu {waiting}</span>
-              <span>Final {finalVal}</span>
+            <div className="flex items-center justify-between text-[10px]">
+              <span className="flex items-center gap-1 text-muted-foreground">
+                <Clock className="w-2.5 h-2.5" />
+                Menunggu <span className="font-semibold text-foreground">{waiting}</span>
+              </span>
+              <span className="flex items-center gap-1 text-muted-foreground">
+                <CheckCircle2 className="w-2.5 h-2.5 text-primary" />
+                Final <span className="font-semibold text-foreground">{finalVal}</span>
+              </span>
             </div>
           </div>
         </TooltipTrigger>
-        <TooltipContent side="bottom" className="max-w-[240px] text-[10px] p-3">
-          <p className="font-semibold mb-1">Definisi</p>
-          <p className="text-muted-foreground mb-0.5"><strong>Menunggu</strong> = belum final (AI predicted / pending review)</p>
-          <p className="text-muted-foreground"><strong>Final</strong> = sudah dikonfirmasi (human / auto-confirm)</p>
+        <TooltipContent side="bottom" className="max-w-[260px] text-[11px] p-3 space-y-1">
+          <p className="font-semibold text-foreground">Definisi Status</p>
+          <p className="text-muted-foreground"><strong className="text-foreground">Menunggu</strong> — belum final (AI predicted / pending review)</p>
+          <p className="text-muted-foreground"><strong className="text-foreground">Final</strong> — sudah dikonfirmasi (human / auto-confirm)</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
@@ -198,23 +186,33 @@ const InfoTip = ({ text }: { text: string }) => (
   <TooltipProvider delayDuration={200}>
     <Tooltip>
       <TooltipTrigger asChild>
-        <Info className="w-3 h-3 text-muted-foreground cursor-help shrink-0" />
+        <Info className="w-3.5 h-3.5 text-muted-foreground/50 cursor-help shrink-0 hover:text-muted-foreground transition-colors" />
       </TooltipTrigger>
-      <TooltipContent side="top" className="max-w-[220px] text-[10px]">
+      <TooltipContent side="top" className="max-w-[240px] text-[11px]">
         {text}
       </TooltipContent>
     </Tooltip>
   </TooltipProvider>
 );
 
-/** Scorecard */
-const Scorecard = ({ label, value, waiting, finalVal, tip }: { label: string; value: number; waiting: number; finalVal: number; tip: string }) => (
-  <div className="bg-card border border-border rounded-lg p-4">
-    <div className="flex items-center gap-1.5 mb-1">
-      <span className="text-[11px] font-medium text-muted-foreground">{label}</span>
+/** Scorecard — Mixpanel enterprise style */
+const Scorecard = ({ label, value, waiting, finalVal, tip, accent }: {
+  label: string; value: number; waiting: number; finalVal: number; tip: string; accent?: string;
+}) => (
+  <div className="bg-card rounded-xl border border-border p-5 hover:shadow-md transition-shadow duration-200">
+    <div className="flex items-center justify-between mb-3">
+      <span className="text-[11px] font-medium text-muted-foreground tracking-wide uppercase">{label}</span>
       <InfoTip text={tip} />
     </div>
-    <span className="text-2xl font-bold text-foreground leading-none block">{value}</span>
+    <div className="flex items-end gap-2">
+      <span className="text-3xl font-bold text-foreground leading-none tracking-tight">{value}</span>
+      {finalVal > 0 && (
+        <span className="text-[10px] font-medium text-primary mb-1 flex items-center gap-0.5">
+          <TrendingUp className="w-3 h-3" />
+          {Math.round((finalVal / (waiting + finalVal)) * 100)}% final
+        </span>
+      )}
+    </div>
     <RatioBar waiting={waiting} final={finalVal} />
   </div>
 );
@@ -248,37 +246,55 @@ function AnalyticsMultiSelect({ label, options, selected, onChange }: {
       <button
         onClick={() => { setOpen(!open); setQuery(""); }}
         className={cn(
-          "inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md border text-[11px] font-medium transition-all whitespace-nowrap",
-          hasSelected ? "border-primary/30 bg-primary/5 text-primary" : "border-border text-foreground hover:bg-muted"
+          "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[11px] font-medium transition-all whitespace-nowrap",
+          hasSelected
+            ? "border-primary/40 bg-primary/5 text-primary shadow-sm"
+            : "border-border text-muted-foreground hover:text-foreground hover:bg-secondary"
         )}
       >
         {label}{hasSelected && ` (${selected.length})`}
-        <ChevronDown className={cn("w-3 h-3 transition-transform", open && "rotate-180")} />
+        <ChevronDown className={cn("w-3 h-3 transition-transform duration-200", open && "rotate-180")} />
       </button>
       {open && (
-        <div className="absolute top-full left-0 mt-1 z-[70] bg-popover border border-border rounded-lg shadow-xl w-60 overflow-hidden">
-          <div className="px-3 py-2 border-b border-border">
+        <div className="absolute top-full left-0 mt-1.5 z-[70] bg-popover border border-border rounded-xl shadow-xl w-64 overflow-hidden">
+          <div className="px-3 py-2.5 border-b border-border">
             <div className="relative">
-              <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
               <input
-                type="text" placeholder={`Search ${label.toLowerCase()}...`}
+                type="text" placeholder={`Cari ${label.toLowerCase()}...`}
                 value={query} onChange={(e) => setQuery(e.target.value)}
-                className="w-full pl-7 pr-2 py-1.5 text-[11px] bg-transparent border border-border rounded focus:outline-none focus:ring-1 focus:ring-primary/30"
+                className="w-full pl-8 pr-3 py-2 text-[11px] bg-secondary/50 border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/60"
               />
             </div>
           </div>
-          <div className="max-h-40 overflow-auto py-1">
-            {filteredOptions.length === 0 && <p className="px-3 py-2 text-[11px] text-muted-foreground">Tidak ada hasil</p>}
+          <div className="max-h-44 overflow-auto py-1 scrollbar-thin">
+            {filteredOptions.length === 0 && <p className="px-3 py-3 text-[11px] text-muted-foreground text-center">Tidak ada hasil</p>}
             {filteredOptions.map((opt) => (
-              <label key={opt} className="flex items-center gap-2 px-3 py-1.5 text-[11px] hover:bg-muted/50 cursor-pointer">
-                <input type="checkbox" checked={draft.includes(opt)} onChange={() => setDraft(prev => prev.includes(opt) ? prev.filter(s => s !== opt) : [...prev, opt])} className="accent-primary w-3 h-3" />
+              <label key={opt} className="flex items-center gap-2.5 px-3 py-2 text-[11px] hover:bg-secondary/60 cursor-pointer transition-colors">
+                <div className={cn(
+                  "w-4 h-4 rounded border-2 flex items-center justify-center transition-all shrink-0",
+                  draft.includes(opt)
+                    ? "bg-primary border-primary"
+                    : "border-border bg-background"
+                )}>
+                  {draft.includes(opt) && <Check className="w-2.5 h-2.5 text-primary-foreground" />}
+                </div>
+                <input type="checkbox" checked={draft.includes(opt)} onChange={() => setDraft(prev => prev.includes(opt) ? prev.filter(s => s !== opt) : [...prev, opt])} className="sr-only" />
                 <span className="truncate">{opt}</span>
               </label>
             ))}
           </div>
-          <div className="px-3 py-2 border-t border-border flex items-center justify-end gap-2">
-            <button onClick={() => { setOpen(false); setQuery(""); }} className="px-3 py-1.5 text-[11px] text-muted-foreground hover:text-foreground rounded border border-border transition-colors">Cancel</button>
-            <button onClick={() => { onChange(draft); setOpen(false); setQuery(""); }} className="px-3 py-1.5 text-[11px] font-medium text-primary-foreground bg-primary rounded hover:bg-primary/90 transition-colors">Apply</button>
+          <div className="px-3 py-2.5 border-t border-border flex items-center justify-between">
+            <button
+              onClick={() => setDraft([])}
+              className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Clear all
+            </button>
+            <div className="flex items-center gap-2">
+              <button onClick={() => { setOpen(false); setQuery(""); }} className="px-3 py-1.5 text-[11px] text-muted-foreground hover:text-foreground rounded-lg transition-colors">Batal</button>
+              <button onClick={() => { onChange(draft); setOpen(false); setQuery(""); }} className="px-4 py-1.5 text-[11px] font-semibold text-primary-foreground bg-primary rounded-lg hover:bg-primary/90 transition-colors">Terapkan</button>
+            </div>
           </div>
         </div>
       )}
@@ -295,32 +311,32 @@ function AnalyticsDateFilter({ dateRange, onChange }: { dateRange: DateRange; on
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <button className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border text-[11px] font-medium text-foreground hover:bg-muted transition-all whitespace-nowrap">
+        <button className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border text-[11px] font-medium text-foreground hover:bg-secondary transition-all whitespace-nowrap">
           <CalendarDays className="w-3.5 h-3.5 text-muted-foreground" />
           {formatDateCompact(dateRange)}
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start" side="bottom">
+      <PopoverContent className="w-auto p-0 rounded-xl overflow-hidden" align="start" side="bottom">
         <div className="flex">
-          <div className="w-36 border-r border-border py-2">
+          <div className="w-40 border-r border-border py-2 bg-secondary/30">
             {presets.map((p) => (
               <button
                 key={p.label}
                 onClick={() => { onChange({ from: p.from, to: p.to }); setOpen(false); }}
                 className={cn(
-                  "w-full text-left px-3 py-2 text-[11px] hover:bg-muted transition-colors flex items-center justify-between",
+                  "w-full text-left px-4 py-2.5 text-[11px] hover:bg-secondary transition-colors flex items-center justify-between",
                   activePreset?.label === p.label && "text-primary font-semibold bg-primary/5"
                 )}
               >
                 {p.label}
-                {activePreset?.label === p.label && <Check className="w-3 h-3" />}
+                {activePreset?.label === p.label && <Check className="w-3.5 h-3.5" />}
               </button>
             ))}
-            <div className="border-t border-border mt-1 pt-1 px-3">
-              <span className="text-[9px] text-muted-foreground uppercase tracking-wider">Custom</span>
+            <div className="border-t border-border mt-1 pt-2 px-4">
+              <span className="text-[9px] text-muted-foreground uppercase tracking-widest font-semibold">Custom</span>
             </div>
           </div>
-          <div className="p-2">
+          <div className="p-3">
             <Calendar
               mode="range"
               selected={{ from: dateRange.from, to: dateRange.to }}
@@ -346,107 +362,146 @@ const renderActiveShape = (props: any) => {
     <Sector
       cx={cx} cy={cy}
       innerRadius={innerRadius - 2}
-      outerRadius={outerRadius + 4}
+      outerRadius={outerRadius + 5}
       startAngle={startAngle} endAngle={endAngle}
       fill={fill}
+      style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.15))" }}
     />
   );
 };
 
-/** Label Analytics Section (TBC / GR / PSPP) */
+/** Label Analytics Section (TBC / GR / PSPP) — Mixpanel style */
 const LabelAnalyticsSection = ({ title, data, field }: { title: string; data: HazardTask[]; field: "tbc" | "pspp" | "gr" }) => {
   const { pieData, tableData, finalCount, waitingCount } = useMemo(() => computeFinalDistribution(data, field), [data, field]);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
 
-  // Sync hover between pie and table
   const pieIdx = hoveredRow !== null ? pieData.findIndex(d => d.name === hoveredRow) : activeIndex;
 
   if (data.length === 0) {
     return (
-      <div className="mb-6">
-        <h3 className="text-[13px] font-semibold text-foreground mb-1">{title}</h3>
-        <p className="text-[11px] text-muted-foreground">Tidak ada label final pada rentang ini.</p>
+      <div className="mb-8 bg-card rounded-xl border border-border p-6">
+        <h3 className="text-sm font-semibold text-foreground mb-2">{title}</h3>
+        <p className="text-[11px] text-muted-foreground">Tidak ada data pada rentang ini.</p>
       </div>
     );
   }
 
   return (
-    <div className="mb-8">
-      <div className="flex items-center gap-2 mb-1">
-        <h3 className="text-[13px] font-semibold text-foreground">{title}</h3>
-        <InfoTip text="Distribusi berdasarkan label FINAL pada scope analytics saat ini." />
+    <div className="mb-6 bg-card rounded-xl border border-border overflow-hidden">
+      {/* Section header */}
+      <div className="px-6 py-4 border-b border-border bg-secondary/20">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-2 h-2 rounded-full bg-primary" />
+            <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+            <InfoTip text="Distribusi berdasarkan label FINAL pada scope analytics saat ini." />
+          </div>
+          <div className="flex items-center gap-3 text-[10px]">
+            <span className="flex items-center gap-1 text-muted-foreground">
+              <CheckCircle2 className="w-3 h-3 text-primary" />
+              <span className="font-semibold text-foreground">{finalCount}</span> final
+            </span>
+            <span className="flex items-center gap-1 text-muted-foreground">
+              <Clock className="w-3 h-3" />
+              <span className="font-semibold text-foreground">{waitingCount}</span> menunggu
+            </span>
+          </div>
+        </div>
       </div>
-      <p className="text-[10px] text-muted-foreground mb-4">Berdasarkan label FINAL pada scope · {finalCount} final, {waitingCount} menunggu</p>
 
       {finalCount === 0 ? (
-        <p className="text-[11px] text-muted-foreground py-4">Tidak ada label final pada rentang ini.</p>
+        <div className="px-6 py-8 text-center">
+          <p className="text-[11px] text-muted-foreground">Tidak ada label final pada rentang ini.</p>
+        </div>
       ) : (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-[1fr_1.2fr] gap-0">
           {/* Pie Chart */}
-          <div className="h-[220px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={50}
-                  outerRadius={80}
-                  dataKey="value"
-                  activeIndex={pieIdx !== null ? pieIdx : undefined}
-                  activeShape={renderActiveShape}
-                  onMouseEnter={(_, index) => setActiveIndex(index)}
-                  onMouseLeave={() => setActiveIndex(null)}
-                >
-                  {pieData.map((entry, i) => (
-                    <Cell key={i} fill={entry.isOthers ? OTHERS_COLOR : PIE_COLORS[i % PIE_COLORS.length]} />
-                  ))}
-                </Pie>
-                <RechartsTooltip
-                  contentStyle={{ fontSize: 11, borderRadius: 8, border: "1px solid hsl(220,13%,91%)" }}
-                  formatter={(value: number, name: string) => [`${value} (${data.length > 0 ? Math.round((value / data.length) * 100) : 0}%)`, name]}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+          <div className="p-6 flex items-center justify-center border-r border-border">
+            <div className="h-[200px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={55}
+                    outerRadius={82}
+                    dataKey="value"
+                    activeIndex={pieIdx !== null ? pieIdx : undefined}
+                    activeShape={renderActiveShape}
+                    onMouseEnter={(_, index) => setActiveIndex(index)}
+                    onMouseLeave={() => setActiveIndex(null)}
+                    strokeWidth={2}
+                    stroke="hsl(var(--card))"
+                  >
+                    {pieData.map((entry, i) => (
+                      <Cell key={i} fill={entry.isOthers ? OTHERS_COLOR : PIE_COLORS[i % PIE_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <RechartsTooltip
+                    contentStyle={{
+                      fontSize: 11,
+                      borderRadius: 10,
+                      border: "1px solid hsl(var(--border))",
+                      backgroundColor: "hsl(var(--popover))",
+                      color: "hsl(var(--popover-foreground))",
+                      boxShadow: "0 4px 12px hsl(var(--foreground) / 0.08)",
+                    }}
+                    formatter={(value: number, name: string) => [`${value} (${data.length > 0 ? Math.round((value / data.length) * 100) : 0}%)`, name]}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           </div>
 
           {/* Table breakdown */}
-          <div className="max-h-[220px] overflow-auto scrollbar-thin border border-border rounded-lg">
-            <table className="w-full text-[11px]">
-              <thead className="sticky top-0 bg-muted/80 backdrop-blur-sm">
-                <tr>
-                  <th className="text-left px-3 py-2 font-medium text-muted-foreground">Label</th>
-                  <th className="text-right px-3 py-2 font-medium text-muted-foreground w-14">Jml</th>
-                  <th className="text-right px-3 py-2 font-medium text-muted-foreground w-12">%</th>
-                </tr>
-              </thead>
-              <tbody>
-                {tableData.map((row, i) => (
-                  <tr
-                    key={row.name}
-                    onMouseEnter={() => { setHoveredRow(row.name); }}
-                    onMouseLeave={() => setHoveredRow(null)}
-                    className={cn(
-                      "transition-colors cursor-pointer",
-                      (hoveredRow === row.name || (pieIdx !== null && pieData[pieIdx]?.name === row.name))
-                        ? "bg-primary/5"
-                        : "hover:bg-muted/40"
-                    )}
-                  >
-                    <td className="px-3 py-1.5 flex items-center gap-2">
-                      <span
-                        className="w-2.5 h-2.5 rounded-sm shrink-0"
-                        style={{ backgroundColor: pieData.find(p => p.name === row.name)?.isOthers ? OTHERS_COLOR : PIE_COLORS[pieData.findIndex(p => p.name === row.name) % PIE_COLORS.length] }}
-                      />
-                      <span className="truncate max-w-[160px]">{row.name}</span>
-                    </td>
-                    <td className="text-right px-3 py-1.5 font-medium">{row.value}</td>
-                    <td className="text-right px-3 py-1.5 text-muted-foreground">{row.pct}%</td>
+          <div className="overflow-hidden">
+            <div className="max-h-[260px] overflow-auto scrollbar-thin">
+              <table className="w-full text-[11px]">
+                <thead className="sticky top-0 bg-secondary/60 backdrop-blur-sm">
+                  <tr>
+                    <th className="text-left px-5 py-2.5 font-semibold text-muted-foreground text-[10px] uppercase tracking-wider">Label</th>
+                    <th className="text-right px-4 py-2.5 font-semibold text-muted-foreground text-[10px] uppercase tracking-wider w-16">Jumlah</th>
+                    <th className="text-right px-5 py-2.5 font-semibold text-muted-foreground text-[10px] uppercase tracking-wider w-16">Share</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {tableData.map((row, i) => {
+                    const isActive = hoveredRow === row.name || (pieIdx !== null && pieData[pieIdx]?.name === row.name);
+                    const colorIdx = pieData.findIndex(p => p.name === row.name);
+                    const dotColor = pieData.find(p => p.name === row.name)?.isOthers
+                      ? OTHERS_COLOR
+                      : PIE_COLORS[colorIdx % PIE_COLORS.length];
+                    return (
+                      <tr
+                        key={row.name}
+                        onMouseEnter={() => setHoveredRow(row.name)}
+                        onMouseLeave={() => setHoveredRow(null)}
+                        className={cn(
+                          "transition-colors cursor-pointer border-b border-border/50 last:border-0",
+                          isActive ? "bg-primary/5" : "hover:bg-secondary/40"
+                        )}
+                      >
+                        <td className="px-5 py-2.5 flex items-center gap-2.5">
+                          <span
+                            className="w-2.5 h-2.5 rounded-full shrink-0 ring-2 ring-background"
+                            style={{ backgroundColor: dotColor }}
+                          />
+                          <span className="truncate max-w-[180px] font-medium text-foreground">{row.name}</span>
+                        </td>
+                        <td className="text-right px-4 py-2.5 font-bold text-foreground">{row.value}</td>
+                        <td className="text-right px-5 py-2.5">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-secondary text-[10px] font-medium text-muted-foreground">
+                            {row.pct}%
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
@@ -456,11 +511,9 @@ const LabelAnalyticsSection = ({ title, data, field }: { title: string; data: Ha
 
 // ─── Main Component ─────────────────────────────────────────
 const AnalyticsDrawer = ({ open, onClose, allData, filteredData, dateRange, filters, onApplyToPage }: AnalyticsDrawerProps) => {
-  // Drawer's own filters (independent from page)
   const [drawerDate, setDrawerDate] = useState<DateRange>(dateRange);
   const [drawerFilters, setDrawerFilters] = useState<ColumnFilters>(emptyFilters);
 
-  // Sync when opening
   useEffect(() => {
     if (open) {
       setDrawerDate(dateRange);
@@ -468,7 +521,6 @@ const AnalyticsDrawer = ({ open, onClose, allData, filteredData, dateRange, filt
     }
   }, [open]);
 
-  // Filter options from allData
   const filterOptions = useMemo(() => {
     const unique = (arr: string[]) => [...new Set(arr.filter(Boolean))].sort();
     return {
@@ -480,7 +532,6 @@ const AnalyticsDrawer = ({ open, onClose, allData, filteredData, dateRange, filt
     };
   }, [allData]);
 
-  // Compute analytics data using drawer's own filters
   const analyticsData = useMemo(() => {
     return allData.filter(h => {
       if (drawerFilters.site.length && !drawerFilters.site.includes(h.site)) return false;
@@ -492,13 +543,16 @@ const AnalyticsDrawer = ({ open, onClose, allData, filteredData, dateRange, filt
     });
   }, [allData, drawerFilters]);
 
-  // Scorecards
   const scorecards = useMemo(() => {
     const d = analyticsData;
     const fields: ("tbc" | "pspp" | "gr")[] = ["tbc", "pspp", "gr"];
 
     let totalWaiting = 0, totalFinal = 0;
-    const perField: Record<string, { final: number; waiting: number }> = { tbc: { final: 0, waiting: 0 }, pspp: { final: 0, waiting: 0 }, gr: { final: 0, waiting: 0 } };
+    const perField: Record<string, { final: number; waiting: number }> = {
+      tbc: { final: 0, waiting: 0 },
+      pspp: { final: 0, waiting: 0 },
+      gr: { final: 0, waiting: 0 },
+    };
 
     for (const h of d) {
       let anyWaiting = false;
@@ -513,14 +567,7 @@ const AnalyticsDrawer = ({ open, onClose, allData, filteredData, dateRange, filt
       if (anyWaiting) totalWaiting++; else totalFinal++;
     }
 
-    return {
-      total: d.length,
-      totalWaiting,
-      totalFinal,
-      tbc: perField.tbc,
-      pspp: perField.pspp,
-      gr: perField.gr,
-    };
+    return { total: d.length, totalWaiting, totalFinal, tbc: perField.tbc, pspp: perField.pspp, gr: perField.gr };
   }, [analyticsData]);
 
   const isFilterDifferent = !dateRangesEqual(drawerDate, dateRange) || !filtersEqual(drawerFilters, { ...emptyFilters, ...filters });
@@ -542,59 +589,48 @@ const AnalyticsDrawer = ({ open, onClose, allData, filteredData, dateRange, filt
 
   return (
     <>
-      {/* Backdrop - subtle */}
-      <div className="fixed inset-0 bg-foreground/8 z-40 backdrop-blur-[1px]" onClick={onClose} />
+      {/* Backdrop */}
+      <div className="fixed inset-0 bg-foreground/6 z-40" onClick={onClose} />
 
       {/* Wide Drawer */}
-      <div className="fixed top-0 right-0 h-full w-[55vw] max-w-[960px] min-w-[640px] bg-background border-l border-border z-50 shadow-2xl flex flex-col animate-slide-in-right">
-
+      <div
+        className="fixed top-0 right-0 h-full w-[52vw] max-w-[920px] min-w-[600px] bg-background z-50 flex flex-col"
+        style={{
+          boxShadow: "-8px 0 40px hsl(var(--foreground) / 0.08), -1px 0 0 hsl(var(--border))",
+          animation: "slideInRight 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
+        }}
+      >
         {/* ── Header ── */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
+        <div className="flex items-center justify-between px-7 py-5 border-b border-border shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-              <BarChart3 className="w-4 h-4 text-primary" />
+            <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
+              <BarChart3 className="w-[18px] h-[18px] text-primary" />
             </div>
             <div>
-              <h2 className="text-[15px] font-semibold text-foreground">Analytics</h2>
-              <p className="text-[10px] text-muted-foreground">Label distribution & final counts</p>
+              <h2 className="text-base font-bold text-foreground tracking-tight">Analytics</h2>
+              <p className="text-[11px] text-muted-foreground mt-0.5">Distribusi label & metrik evaluasi</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => exportCSV(analyticsData)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border text-[11px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-            >
-              <Download className="w-3.5 h-3.5" />
-              Export CSV
-            </button>
-            <button onClick={onClose} className="p-1.5 rounded-md hover:bg-muted transition-colors">
-              <X className="w-4 h-4 text-muted-foreground" />
-            </button>
-          </div>
+          <button onClick={onClose} className="p-2 rounded-lg hover:bg-secondary transition-colors">
+            <X className="w-4 h-4 text-muted-foreground" />
+          </button>
         </div>
 
         {/* ── Sticky Filter Bar ── */}
-        <div className="px-6 py-3 border-b border-border bg-card shrink-0 sticky top-0 z-10">
+        <div className="px-7 py-3.5 border-b border-border bg-card/80 backdrop-blur-sm shrink-0 sticky top-0 z-10">
           <div className="flex items-center gap-2 flex-wrap">
-            {/* Date filter */}
             <AnalyticsDateFilter dateRange={drawerDate} onChange={setDrawerDate} />
-
             <div className="h-5 w-px bg-border shrink-0" />
-
-            {/* Global filters */}
             <AnalyticsMultiSelect label="Site" options={filterOptions.sites} selected={drawerFilters.site} onChange={(v) => setDrawerFilters(prev => ({ ...prev, site: v }))} />
             <AnalyticsMultiSelect label="Lokasi" options={filterOptions.lokasi} selected={drawerFilters.lokasi} onChange={(v) => setDrawerFilters(prev => ({ ...prev, lokasi: v }))} />
             <AnalyticsMultiSelect label="Detail Lokasi" options={filterOptions.detail_location} selected={drawerFilters.detail_location} onChange={(v) => setDrawerFilters(prev => ({ ...prev, detail_location: v }))} />
             <AnalyticsMultiSelect label="Ketidaksesuaian" options={filterOptions.ketidaksesuaian} selected={drawerFilters.ketidaksesuaian} onChange={(v) => setDrawerFilters(prev => ({ ...prev, ketidaksesuaian: v }))} />
-            <AnalyticsMultiSelect label="Sub Ketidaksesuaian" options={filterOptions.sub_ketidaksesuaian} selected={drawerFilters.sub_ketidaksesuaian} onChange={(v) => setDrawerFilters(prev => ({ ...prev, sub_ketidaksesuaian: v }))} />
 
-            {/* Spacer */}
             <div className="flex-1" />
 
-            {/* Action buttons */}
             <button
               onClick={handleReset}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md border border-border text-[11px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
             >
               <RotateCcw className="w-3 h-3" />
               Reset
@@ -603,10 +639,10 @@ const AnalyticsDrawer = ({ open, onClose, allData, filteredData, dateRange, filt
               onClick={handleApply}
               disabled={!isFilterDifferent}
               className={cn(
-                "inline-flex items-center gap-1.5 px-4 py-1.5 rounded-md text-[11px] font-semibold transition-all",
+                "inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[11px] font-semibold transition-all",
                 isFilterDifferent
                   ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
-                  : "bg-muted text-muted-foreground cursor-not-allowed"
+                  : "bg-secondary text-muted-foreground cursor-not-allowed"
               )}
             >
               <ArrowRightToLine className="w-3.5 h-3.5" />
@@ -614,21 +650,22 @@ const AnalyticsDrawer = ({ open, onClose, allData, filteredData, dateRange, filt
             </button>
           </div>
 
-          {/* Status indicator */}
           {isFilterDifferent && (
-            <p className="mt-2 text-[10px] text-status-progress font-medium flex items-center gap-1">
+            <div className="mt-2.5 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-accent/50 border border-accent">
               <span className="w-1.5 h-1.5 rounded-full bg-status-progress animate-pulse" />
-              Filter analytics berbeda dari halaman utama — klik "Apply to Page" untuk menerapkan.
-            </p>
+              <p className="text-[10px] text-accent-foreground font-medium">
+                Filter analytics berbeda dari halaman utama — klik "Apply to Page" untuk menerapkan.
+              </p>
+            </div>
           )}
         </div>
 
         {/* ── Content ── */}
-        <div className="flex-1 overflow-y-auto px-6 py-6 scrollbar-thin">
+        <div className="flex-1 overflow-y-auto px-7 py-6 scrollbar-thin bg-secondary/20">
           {analyticsData.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-60 text-muted-foreground">
-              <BarChart3 className="w-10 h-10 mb-3 opacity-20" />
-              <p className="text-sm font-medium">Tidak ada data pada rentang ini</p>
+              <BarChart3 className="w-12 h-12 mb-3 opacity-15" />
+              <p className="text-sm font-semibold text-foreground">Tidak ada data</p>
               <p className="text-[11px] mt-1">Coba ubah filter atau rentang tanggal</p>
             </div>
           ) : (
@@ -636,37 +673,26 @@ const AnalyticsDrawer = ({ open, onClose, allData, filteredData, dateRange, filt
               {/* Section 1: Scorecards */}
               <div className="grid grid-cols-4 gap-4 mb-8">
                 <Scorecard
-                  label="Total Hazard"
-                  value={scorecards.total}
-                  waiting={scorecards.totalWaiting}
-                  finalVal={scorecards.totalFinal}
-                  tip="Menghitung label FINAL pada scope analytics. Total hazard dalam rentang waktu dan filter yang dipilih."
+                  label="Total Hazard" value={scorecards.total}
+                  waiting={scorecards.totalWaiting} finalVal={scorecards.totalFinal}
+                  tip="Total hazard dalam rentang waktu dan filter yang dipilih."
                 />
                 <Scorecard
-                  label="Total TBC"
-                  value={scorecards.tbc.final + scorecards.tbc.waiting}
-                  waiting={scorecards.tbc.waiting}
-                  finalVal={scorecards.tbc.final}
-                  tip="Menghitung label FINAL TBC pada scope analytics."
+                  label="Total TBC" value={scorecards.tbc.final + scorecards.tbc.waiting}
+                  waiting={scorecards.tbc.waiting} finalVal={scorecards.tbc.final}
+                  tip="Menghitung label TBC pada scope analytics."
                 />
                 <Scorecard
-                  label="Total GR"
-                  value={scorecards.gr.final + scorecards.gr.waiting}
-                  waiting={scorecards.gr.waiting}
-                  finalVal={scorecards.gr.final}
-                  tip="Menghitung label FINAL GR pada scope analytics."
+                  label="Total GR" value={scorecards.gr.final + scorecards.gr.waiting}
+                  waiting={scorecards.gr.waiting} finalVal={scorecards.gr.final}
+                  tip="Menghitung label GR pada scope analytics."
                 />
                 <Scorecard
-                  label="Total PSPP"
-                  value={scorecards.pspp.final + scorecards.pspp.waiting}
-                  waiting={scorecards.pspp.waiting}
-                  finalVal={scorecards.pspp.final}
-                  tip="Menghitung label FINAL PSPP pada scope analytics."
+                  label="Total PSPP" value={scorecards.pspp.final + scorecards.pspp.waiting}
+                  waiting={scorecards.pspp.waiting} finalVal={scorecards.pspp.final}
+                  tip="Menghitung label PSPP pada scope analytics."
                 />
               </div>
-
-              {/* Divider */}
-              <div className="border-t border-border mb-8" />
 
               {/* Section 2: TBC / GR / PSPP */}
               <LabelAnalyticsSection title="TBC Analytics" data={analyticsData} field="tbc" />
@@ -676,6 +702,13 @@ const AnalyticsDrawer = ({ open, onClose, allData, filteredData, dateRange, filt
           )}
         </div>
       </div>
+
+      <style>{`
+        @keyframes slideInRight {
+          from { transform: translateX(100%); }
+          to { transform: translateX(0); }
+        }
+      `}</style>
     </>
   );
 };

@@ -2,16 +2,21 @@ import { HazardTask, AILabel } from "@/types/hazard";
 
 const img = "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=100&h=100&fit=crop";
 
-function makeLabel(primary: string, relevance: number, candidates: { label: string; category?: string; relevance: number; reasoning: string }[]): AILabel {
+function makeLabel(
+  primary: string,
+  relevance: number,
+  candidates: { label: string; category?: string; relevance: number; reasoning: string }[],
+  opts?: { locked?: boolean; auto_confirmed?: boolean; human_label?: string; annotated_by?: string; annotated_at?: string }
+): AILabel {
   return {
     ai_label: primary,
-    human_label: null,
+    human_label: opts?.human_label || null,
     annotation_note: null,
-    annotated_by: null,
-    annotated_at: null,
+    annotated_by: opts?.annotated_by || null,
+    annotated_at: opts?.annotated_at || null,
     candidates,
-    locked: false,
-    auto_confirmed: false,
+    locked: opts?.locked ?? false,
+    auto_confirmed: opts?.auto_confirmed ?? false,
   };
 }
 
@@ -32,18 +37,18 @@ export const mockHazards: HazardTask[] = [
       { label: "Kaleng thinner tanpa label di area penyimpanan bahan kimia", category: "Deviasi Prosedur", relevance: 82, reasoning: "Kaleng thinner tanpa label identifikasi ditemukan. Melanggar SOP penyimpanan bahan kimia. Perlu pemasangan label dan audit ulang area." },
       { label: "Bahan kimia tidak diamankan dengan baik", category: "Pengamanan", relevance: 65, reasoning: "Bahan kimia tanpa label berisiko salah penanganan. Tidak ada pengamanan khusus di lokasi. Rekomendasikan penambahan barrier dan signage." },
       { label: "Thinner mudah terbakar tanpa penanganan", category: "Bahaya Kebakaran", relevance: 48, reasoning: "Thinner adalah bahan mudah terbakar. Penyimpanan tanpa ventilasi memadai. Perlu APAR dan zona aman di sekitar penyimpanan." },
-    ]),
+    ], { locked: true, human_label: "1. Deviasi Prosedur", annotated_by: "Ahmad R.", annotated_at: "2025-09-18 09:30" }),
     pspp: makeLabel("1. Deviasi Prosedur", 78, [
       { label: "Tidak memberi label pada bahan kimia sesuai prosedur", category: "Chemical Storage", relevance: 78, reasoning: "Label bahan kimia tidak terpasang sesuai prosedur. Risiko kontaminasi silang material. Tindakan korektif: labeling ulang seluruh kontainer." },
       { label: "Area penyimpanan tidak tertata rapi", category: "Housekeeping", relevance: 60, reasoning: "Material tidak terorganisir di rak penyimpanan. Akses darurat terhalang. Perlu penataan ulang sesuai standar housekeeping." },
       { label: "Bahan berbahaya tanpa pengamanan memadai", category: "Safety Compliance", relevance: 45, reasoning: "Bahan B3 tanpa secondary containment. Tidak ada MSDS terpampang. Perlu perbaikan sistem pengamanan bahan berbahaya." },
-    ]),
+    ], { auto_confirmed: true }),
     gr: makeLabel("1. Deviasi Prosedur", 75, [
       { label: "Prosedur penyimpanan bahan kimia tidak diikuti", category: "Deviasi Prosedur", relevance: 75, reasoning: "SOP penyimpanan kimia tidak dipatuhi. Tidak ada checklist inspeksi harian. Rekomendasikan training ulang petugas gudang." },
       { label: "Risiko kebakaran dari penyimpanan kimia", category: "Bahaya Kebakaran", relevance: 55, reasoning: "Bahan mudah terbakar dekat sumber panas. APAR terdekat belum dicek. Perlu evaluasi layout penyimpanan." },
       { label: "Area penyimpanan tidak terorganisir", category: "Housekeeping", relevance: 40, reasoning: "Barang campur tanpa pemisahan kategori. Jalur evakuasi sempit. Segera lakukan 5S di area gudang." },
-    ]),
-    status: "ai_pending", reporter: "Ahmad S.", sla_deadline: deadline(3),
+    ], { locked: true, human_label: "1. Deviasi Prosedur", annotated_by: "Siti N.", annotated_at: "2025-09-18 10:00" }),
+    status: "human_locked", reporter: "Ahmad S.", sla_deadline: deadline(3),
   },
   {
     id: "7316406", timestamp: "2025-09-18 07:52", pic_perusahaan: "PT Serasi ...", site: "BMO 1",
@@ -64,7 +69,7 @@ export const mockHazards: HazardTask[] = [
       { label: "Kondisi alat di bawah standar kelayakan", category: "Tools Tidak Layak", relevance: 64, reasoning: "Alat welding aus dan tidak dikalibrasi. Terakhir dicek lebih dari 3 bulan lalu. Jadwalkan rekalibrasi segera." },
       { label: "Prosedur pengecekan alat tidak dipatuhi", category: "Deviasi Prosedur", relevance: 48, reasoning: "Form pengecekan harian kosong. Tidak ada tanda tangan pengawas. Terapkan sistem checklist digital." },
       { label: "Risiko posisi pekerja", category: "Posisi Pekerja", relevance: 35, reasoning: "Pekerja berada di posisi rawan percikan. Jarak kerja terlalu dekat. Atur ulang layout area welding." },
-    ]),
+    ], { auto_confirmed: true }),
     status: "ai_pending", reporter: "Budi R.", sla_deadline: deadline(45),
   },
   {
@@ -76,18 +81,18 @@ export const mockHazards: HazardTask[] = [
       { label: "LOTO tidak terpasang dengan benar pada panel listrik", category: "LOTO", relevance: 91, reasoning: "Gembok LOTO terpasang longgar di panel utama. Tag identifikasi pekerja tidak ada. Hentikan kerja dan pasang ulang LOTO sesuai SOP." },
       { label: "Panel listrik terbuka tanpa pengaman", category: "Bahaya Elektrikal", relevance: 72, reasoning: "Cover panel terbuka saat LOTO aktif. Risiko kontak langsung dengan terminal. Pasang cover dan verifikasi isolasi energi." },
       { label: "Prosedur standar LOTO tidak diikuti", category: "Deviasi Prosedur", relevance: 55, reasoning: "Langkah LOTO tidak sesuai SOP 7 langkah. Pekerja tidak terlatih prosedur terbaru. Jadwalkan refresher training LOTO." },
-    ]),
+    ], { locked: true, human_label: "7. LOTO", annotated_by: "Dewi S.", annotated_at: "2025-09-18 08:15" }),
     pspp: makeLabel("7. LOTO", 88, [
       { label: "Kegagalan kepatuhan LOTO terdeteksi", category: "Lockout/Tagout", relevance: 88, reasoning: "Sistem LOTO tidak mengikuti standar perusahaan. Ditemukan saat inspeksi rutin. Eskalasi ke supervisor keselamatan." },
       { label: "Risiko tersengat listrik", category: "Electrical Safety", relevance: 68, reasoning: "Tegangan masih aktif saat LOTO dipasang. Pengukuran zero energy belum dilakukan. Lakukan pengujian voltage sebelum kerja." },
       { label: "Kunci keselamatan tidak ada", category: "Safety Lock", relevance: 45, reasoning: "Personal lock pekerja tidak digunakan. Hanya mengandalkan group lock. Setiap pekerja wajib punya personal lock." },
-    ]),
+    ], { locked: true, human_label: "7. LOTO", annotated_by: "Dewi S.", annotated_at: "2025-09-18 08:20" }),
     gr: makeLabel("7. LOTO", 85, [
       { label: "Ketidakpatuhan LOTO terkonfirmasi", category: "LOTO", relevance: 85, reasoning: "Prosedur LOTO dilanggar di panel listrik. Sudah terjadi 2x di lokasi sama. Perlu tindakan disipliner dan perbaikan sistem." },
       { label: "Risiko keselamatan listrik", category: "Bahaya Elektrikal", relevance: 65, reasoning: "Panel 380V tanpa proteksi memadai. Arc flash risk tinggi. Pasang label bahaya dan APD arc flash." },
       { label: "Deviasi prosedur terdeteksi", category: "Deviasi Prosedur", relevance: 50, reasoning: "SOP LOTO tidak diupdate 6 bulan. Versi lama masih digunakan lapangan. Distribusikan SOP terbaru ke semua tim." },
     ]),
-    status: "ai_pending", reporter: "Cahya M.", sla_deadline: deadline(95),
+    status: "in_progress", reporter: "Cahya M.", sla_deadline: deadline(95),
   },
   {
     id: "7316441", timestamp: "2025-09-18 07:33", pic_perusahaan: "PT Berau Coal", site: "BMO 2",
@@ -98,7 +103,7 @@ export const mockHazards: HazardTask[] = [
       { label: "Sampah menumpuk di area penyimpanan", category: "Housekeeping", relevance: 68, reasoning: "Sampah organik dan anorganik bercampur di gudang. Tidak ada jadwal pembersihan rutin. Terapkan sistem 5S dan jadwal piket." },
       { label: "SOP pengelolaan limbah tidak diikuti", category: "Deviasi Prosedur", relevance: 55, reasoning: "Limbah B3 dicampur dengan limbah umum. Petugas tidak mengikuti prosedur segregasi. Lakukan training waste management." },
       { label: "Akses pekerja terhalang sampah", category: "Posisi Pekerja", relevance: 30, reasoning: "Jalur akses tertutup tumpukan sampah. Evakuasi darurat terhambat. Bersihkan jalur dan pasang marka lantai." },
-    ]),
+    ], { auto_confirmed: true }),
     pspp: makeLabel("2. Housekeeping", 65, [
       { label: "Housekeeping buruk di area gudang", category: "Warehouse Mgmt", relevance: 65, reasoning: "Standar kebersihan gudang tidak terpenuhi. Inspeksi terakhir menunjukkan skor rendah. Perlu program perbaikan berkelanjutan." },
       { label: "Pelanggaran prosedur pembuangan limbah", category: "Waste Disposal", relevance: 52, reasoning: "Tempat sampah tidak sesuai kode warna. Limbah dibuang sembarangan. Sediakan bin sesuai standar di setiap zona." },
@@ -108,8 +113,8 @@ export const mockHazards: HazardTask[] = [
       { label: "Standar housekeeping tidak terpenuhi", category: "Housekeeping", relevance: 60, reasoning: "Audit 5S menunjukkan skor merah. Area gudang belum pernah di-audit 3 bulan. Jadwalkan audit dan tindakan korektif." },
       { label: "Deviasi prosedur lingkungan", category: "Deviasi Prosedur", relevance: 48, reasoning: "Prosedur pengelolaan lingkungan tidak dipatuhi. Dokumen izin limbah belum diperbarui. Update dokumen dan sosialisasi ulang." },
       { label: "Risiko kebakaran dari sampah menumpuk", category: "Bahaya Kebakaran", relevance: 32, reasoning: "Sampah kering menumpuk dekat instalasi listrik. Tidak ada APAR di radius 10m. Segera bersihkan dan tambah APAR." },
-    ]),
-    status: "ai_pending", reporter: "Dian P.", sla_deadline: deadline(8),
+    ], { locked: true, human_label: "2. Housekeeping", annotated_by: "Rina K.", annotated_at: "2025-09-18 09:45" }),
+    status: "auto_confirmed", reporter: "Dian P.", sla_deadline: deadline(8),
   },
   {
     id: "7316163", timestamp: "2025-09-18 07:20", pic_perusahaan: "PT Arcistec ...", site: "BMO 2",
@@ -125,7 +130,7 @@ export const mockHazards: HazardTask[] = [
       { label: "Bahaya listrik dari kabel terbuka", category: "Electrical Hazard", relevance: 84, reasoning: "Kabel tanpa pelindung di area operasional. Potensi tersengat saat hujan meningkat. Pasang conduit dan grounding tambahan." },
       { label: "Kondisi peralatan di bawah standar", category: "Equipment Standard", relevance: 58, reasoning: "Battery box sudah korosi dan retak. Umur pakai melebihi batas rekomendasi. Ajukan penggantian unit baru." },
       { label: "Cover pengaman tidak ada", category: "Safety Cover", relevance: 40, reasoning: "Cover pengaman hilang sejak maintenance terakhir. Tidak ada pengganti sementara dipasang. Sediakan cover cadangan di gudang." },
-    ]),
+    ], { auto_confirmed: true }),
     gr: makeLabel("11. Bahaya Elektrikal", 80, [
       { label: "Risiko paparan tegangan tinggi", category: "Bahaya Elektrikal", relevance: 80, reasoning: "Tegangan 24V DC terekspos tanpa proteksi. Pekerja bisa kontak saat inspeksi rutin. Pasang guard dan label bahaya." },
       { label: "Masalah integritas alat/peralatan", category: "Tools Tidak Layak", relevance: 55, reasoning: "Komponen battery box sudah usang. Bracket penahan longgar dan berkarat. Lakukan penggantian komponen segera." },
@@ -142,18 +147,18 @@ export const mockHazards: HazardTask[] = [
       { label: "Alat tanggap darurat tidak lengkap", category: "Deviasi Lainnya", relevance: 55, reasoning: "APAR dan kotak P3K tidak tersedia di unit. P2H menunjukkan item emergency kosong. Lengkapi alat darurat sebelum unit beroperasi." },
       { label: "Kesiapan keselamatan kurang", category: "Pengamanan", relevance: 50, reasoning: "Unit beroperasi tanpa emergency kit lengkap. Potensi keterlambatan respons darurat. Sediakan kit standar di setiap unit." },
       { label: "Checklist P2H tidak dilengkapi", category: "Deviasi Prosedur", relevance: 45, reasoning: "Kolom emergency equipment pada P2H kosong. Operator tidak mengecek sebelum jalan. Terapkan verifikasi P2H oleh pengawas." },
-    ]),
+    ], { locked: true, human_label: "15. Deviasi Lainnya", annotated_by: "Yusuf M.", annotated_at: "2025-09-18 08:00" }),
     pspp: makeLabel("15. Deviasi Lainnya", 52, [
       { label: "Respons darurat tidak standar", category: "Emergency Response", relevance: 52, reasoning: "Prosedur tanggap darurat tidak diikuti operator. Titik kumpul evakuasi tidak diketahui. Sosialisasi ulang prosedur ERP." },
       { label: "Celah keamanan di area loading", category: "Loading Area Safety", relevance: 48, reasoning: "Area loading tanpa rambu keselamatan memadai. Kendaraan masuk tanpa escort. Tambahkan signage dan atur traffic management." },
       { label: "Deviasi pemeriksaan pra-operasi", category: "Pre-Op Check", relevance: 40, reasoning: "Pre-use inspection tidak dilakukan operator. Form P2H diisi asal tanpa pengecekan fisik. Lakukan spot check oleh foreman." },
-    ]),
+    ], { auto_confirmed: true }),
     gr: makeLabel("15. Deviasi Lainnya", 50, [
       { label: "Deviasi umum dalam kesiapan darurat", category: "Deviasi Lainnya", relevance: 50, reasoning: "Kesiapan darurat unit di bawah standar minimum. Temuan serupa sudah 3x dalam sebulan. Eskalasi ke level management." },
       { label: "Celah peralatan darurat", category: "Pengamanan", relevance: 46, reasoning: "Stok APAR habis dan belum di-refill. P3K kadaluarsa belum diganti. Buat jadwal inspeksi bulanan alat darurat." },
       { label: "Celah kepatuhan prosedur", category: "Deviasi Prosedur", relevance: 38, reasoning: "Operator tidak paham prosedur terbaru. Training terakhir lebih dari 6 bulan. Jadwalkan refresher training wajib." },
     ]),
-    status: "ai_pending", reporter: "Faisal K.", sla_deadline: deadline(25),
+    status: "human_locked", reporter: "Faisal K.", sla_deadline: deadline(25),
   },
   {
     id: "7315941", timestamp: "2025-09-18 06:55", pic_perusahaan: "PT Bukit Makmu...", site: "LMO",
@@ -169,12 +174,12 @@ export const mockHazards: HazardTask[] = [
       { label: "Masalah kelayakan peralatan terdeteksi", category: "Equipment Fitness", relevance: 73, reasoning: "Kondisi ban tidak layak untuk operasi normal. Inspeksi visual menunjukkan keretakan sidewall. Tarik unit dari operasi untuk perbaikan." },
       { label: "Celah prosedur inspeksi", category: "Inspection Gap", relevance: 55, reasoning: "Inspeksi ban rutin tidak tercatat di logbook. Interval pengecekan tidak konsisten. Terapkan digital inspection system." },
       { label: "Risiko keselamatan jalan hauling", category: "Haul Road Safety", relevance: 48, reasoning: "Unit dengan ban aus beroperasi di grade >8%. Jarak pengereman bertambah signifikan. Batasi unit ke rute flat saja." },
-    ]),
+    ], { locked: true, human_label: "10. Tools Tidak Layak", annotated_by: "Budi R.", annotated_at: "2025-09-18 07:30" }),
     gr: makeLabel("10. Tools Tidak Layak", 70, [
       { label: "Degradasi ban alat berat", category: "Tools Tidak Layak", relevance: 70, reasoning: "Tread depth ban sudah kritis di semua posisi. Potensi blowout saat beban penuh. Prioritaskan penggantian dalam 24 jam." },
       { label: "Risiko keselamatan jalan", category: "Deviasi Road Safety", relevance: 52, reasoning: "Kondisi ban mempengaruhi stabilitas unit. Risiko meningkat di tikungan dan turunan. Pasang speed limiter sementara." },
       { label: "Deviasi pemeliharaan", category: "Deviasi Prosedur", relevance: 45, reasoning: "PM schedule ban tidak diupdate di sistem. Data historis penggantian hilang. Perbaiki sistem tracking maintenance." },
-    ]),
+    ], { auto_confirmed: true }),
     status: "ai_pending", reporter: "Gunawan T.", sla_deadline: deadline(110),
   },
   {
@@ -186,7 +191,7 @@ export const mockHazards: HazardTask[] = [
       { label: "Windrow tersumbat membuat bahaya jalan hauling", category: "Deviasi Road Safety", relevance: 90, reasoning: "Windrow tersumbat material longsor sepanjang 50m. Akses jalan hauling menyempit drastis. Kerahkan dozer untuk pembersihan segera." },
       { label: "Material longsor terdeteksi", category: "Geotech & Geologi", relevance: 68, reasoning: "Longsoran dari lereng potong di sisi jalan. Kondisi tanah jenuh air setelah hujan. Evaluasi stabilitas lereng dan pasang perkuatan." },
       { label: "Celah prosedur pemeliharaan jalan", category: "Deviasi Prosedur", relevance: 45, reasoning: "Inspeksi jalan harian tidak mendeteksi masalah. Laporan kondisi jalan tidak diupdate. Tingkatkan frekuensi patroli jalan." },
-    ]),
+    ], { locked: true, human_label: "8. Deviasi Road Safety", annotated_by: "Cahya M.", annotated_at: "2025-09-18 07:15" }),
     pspp: makeLabel("8. Deviasi Road Safety", 87, [
       { label: "Deviasi standar keselamatan jalan", category: "Road Safety Standard", relevance: 87, reasoning: "Lebar jalan efektif berkurang 40% dari standar. Kendaraan tidak bisa berpapasan dengan aman. Buat jalur satu arah sementara." },
       { label: "Risiko ketidakstabilan geologis", category: "Geological Risk", relevance: 65, reasoning: "Formasi batuan di area longsor tidak stabil. Potensi longsor susulan masih ada. Pasang monitoring geoteknik dan warning system." },
@@ -196,8 +201,8 @@ export const mockHazards: HazardTask[] = [
       { label: "Keselamatan jalan hauling terganggu", category: "Deviasi Road Safety", relevance: 85, reasoning: "Jalan hauling utama terganggu akibat sumbatan. Produktivitas hauling turun 30%. Buka jalur alternatif dan percepat perbaikan." },
       { label: "Masalah geoteknik menyebabkan sumbatan", category: "Geotech & Geologi", relevance: 62, reasoning: "Material longsor mengandung lempung sensitif. Risiko pergerakan tanah lanjutan. Konsultasikan dengan ahli geoteknik." },
       { label: "Deviasi standar pemeliharaan jalan", category: "Deviasi Prosedur", relevance: 42, reasoning: "Standar pemeliharaan jalan tidak dipatuhi tim. Checklist inspeksi jalan tidak lengkap. Review dan update SOP pemeliharaan jalan." },
-    ]),
-    status: "ai_pending", reporter: "Hendra L.", sla_deadline: deadline(55),
+    ], { locked: true, human_label: "8. Deviasi Road Safety", annotated_by: "Hendra L.", annotated_at: "2025-09-18 07:50" }),
+    status: "completed", reporter: "Hendra L.", sla_deadline: deadline(55),
   },
   {
     id: "7315805", timestamp: "2025-09-18 06:30", pic_perusahaan: "PT Bukit Makmu...", site: "BMO 2",
@@ -208,18 +213,18 @@ export const mockHazards: HazardTask[] = [
       { label: "Tumpahan material tanpa rambu peringatan", category: "Kesesuaian", relevance: 72, reasoning: "Material tumpah di badan jalan hauling tanpa tanda. Kendaraan melintas tanpa peringatan bahaya. Pasang rambu dan bersihkan tumpahan segera." },
       { label: "Risiko keselamatan jalan dari tumpahan", category: "Deviasi Road Safety", relevance: 66, reasoning: "Tumpahan membuat permukaan jalan licin. Risiko tergelincir untuk HD dan LV. Taburi material anti-slip dan bersihkan." },
       { label: "Area jalan tidak dibersihkan", category: "Housekeeping", relevance: 48, reasoning: "Pembersihan jalan rutin tidak dilakukan. Tumpahan sudah ada lebih dari 1 shift. Tegur tim maintenance jalan dan bersihkan." },
-    ]),
+    ], { auto_confirmed: true }),
     pspp: makeLabel("9. Kesesuaian", 69, [
       { label: "Celah kepatuhan pemeliharaan jalan", category: "Road Compliance", relevance: 69, reasoning: "Standar pemeliharaan jalan tidak terpenuhi. Inspeksi berkala menemukan banyak deviasi. Perbaiki sistem monitoring kondisi jalan." },
       { label: "Bahaya jalan hauling terdeteksi", category: "Hauling Road Hazard", relevance: 62, reasoning: "Boulder dan material lepas di jalur hauling. Kecepatan kendaraan tidak dikurangi. Pasang speed bump dan warning sign." },
       { label: "Rambu peringatan tidak ada", category: "Warning Signs", relevance: 42, reasoning: "Tidak ada rambu di titik bahaya tumpahan. Signage standar tidak tersedia di gudang. Pesan dan pasang rambu sesuai standar." },
-    ]),
+    ], { locked: true, human_label: "9. Kesesuaian", annotated_by: "Irfan A.", annotated_at: "2025-09-18 07:00" }),
     gr: makeLabel("9. Kesesuaian", 66, [
       { label: "Ketidaksesuaian dengan standar jalan", category: "Kesesuaian", relevance: 66, reasoning: "Kondisi jalan tidak sesuai standar operasi. Super elevation dan cross-fall tidak memenuhi spec. Lakukan perbaikan grading segera." },
       { label: "Deviasi keselamatan jalan", category: "Deviasi Road Safety", relevance: 60, reasoning: "Beberapa titik bahaya belum ditandai. Riwayat insiden di lokasi serupa ada. Tambahkan barrier dan reflector di titik rawan." },
       { label: "Kebersihan jalan tidak terjaga", category: "Housekeeping", relevance: 45, reasoning: "Material lepas tersebar di jalan hauling. Jadwal pembersihan jalan tidak dijalankan. Assign grader untuk pembersihan rutin." },
     ]),
-    status: "ai_pending", reporter: "Irfan A.", sla_deadline: deadline(15),
+    status: "auto_confirmed", reporter: "Irfan A.", sla_deadline: deadline(15),
   },
   {
     id: "7316608", timestamp: "2025-09-18 06:15", pic_perusahaan: "PT Multi Ardecon", site: "MARINE",
@@ -240,7 +245,7 @@ export const mockHazards: HazardTask[] = [
       { label: "Bahaya listrik di area workshop", category: "Bahaya Elektrikal", relevance: 71, reasoning: "Instalasi listrik workshop tidak sesuai standar. Grounding beberapa outlet rusak. Lakukan audit instalasi listrik menyeluruh." },
       { label: "Masalah housekeeping kabel", category: "Housekeeping", relevance: 58, reasoning: "Kabel berserakan menunjukkan housekeeping buruk. Area kerja terlihat tidak aman dan tidak rapi. Terapkan daily cleaning checklist." },
       { label: "Risiko keselamatan fisik", category: "Pengamanan", relevance: 44, reasoning: "Pekerja berisiko cedera dari kabel tidak tertata. Jalur evakuasi terhalang kabel. Bersihkan jalur dan pasang emergency route sign." },
-    ]),
+    ], { auto_confirmed: true }),
     status: "ai_pending", reporter: "Joko S.", sla_deadline: deadline(35),
   },
 ];
