@@ -29,7 +29,7 @@ function pickLokasi(i: number) { return LOKASI_VALUES[i % LOKASI_VALUES.length];
 
 export const mockHazards: HazardTask[] = [
   {
-    id: "7316822", timestamp: "2025-09-18 08:14", pic_perusahaan: "PT Multi Ardecon", site: "BMO 2",
+    id: "7316822", timestamp: "2025-09-18 08:14", pic_perusahaan: "PT Multi Ardecon", pic_name: "Bambang Kurtoyono", site: "BMO 2",
     lokasi: pickLokasi(0),
     detail_location: "Pembangunan ...", ketidaksesuaian: "Pembelian, ...", sub_ketidaksesuaian: "Penyimpanan bahan ...",
     description: "Kaleng Thiner ditemukan tanpa label di area penyimpanan bahan kimia.", image_url: img,
@@ -51,7 +51,7 @@ export const mockHazards: HazardTask[] = [
     status: "human_locked", reporter: "Ahmad S.", sla_deadline: deadline(3),
   },
   {
-    id: "7316406", timestamp: "2025-09-18 07:52", pic_perusahaan: "PT Serasi ...", site: "BMO 1",
+    id: "7316406", timestamp: "2025-09-18 07:52", pic_perusahaan: "PT Serasi Autoraya", pic_name: "Agus Setiawan", site: "BMO 1",
     lokasi: pickLokasi(1),
     detail_location: "Office Cokelat", ketidaksesuaian: "DDP : Kelayakan da...", sub_ketidaksesuaian: "Tidak menggunakan ...",
     description: "Wilnat kurang 1 unit pada area kerja welding tanpa proteksi memadai.", image_url: img,
@@ -73,7 +73,7 @@ export const mockHazards: HazardTask[] = [
     status: "ai_pending", reporter: "Budi R.", sla_deadline: deadline(45),
   },
   {
-    id: "7316563", timestamp: "2025-09-18 07:41", pic_perusahaan: "PT Pamapersad...", site: "BMO 2",
+    id: "7316563", timestamp: "2025-09-18 07:41", pic_perusahaan: "PT Pamapersada Nusantara", pic_name: "Rizky Pratama", site: "BMO 2",
     lokasi: pickLokasi(2),
     detail_location: "Bays Champions", ketidaksesuaian: "Kelayakan/Penggun...", sub_ketidaksesuaian: "Kesesuaian ...",
     description: "Ditemukan Lock out tag out tidak terpasang dengan benar pada panel listrik.", image_url: img,
@@ -95,7 +95,7 @@ export const mockHazards: HazardTask[] = [
     status: "in_progress", reporter: "Cahya M.", sla_deadline: deadline(95),
   },
   {
-    id: "7316441", timestamp: "2025-09-18 07:33", pic_perusahaan: "PT Berau Coal", site: "BMO 2",
+    id: "7316441", timestamp: "2025-09-18 07:33", pic_perusahaan: "PT Berau Coal", pic_name: "Suharto Wibowo", site: "BMO 2",
     lokasi: pickLokasi(3),
     detail_location: "Gudang Handa...", ketidaksesuaian: "Pengelolaan Sampah", sub_ketidaksesuaian: "[ENV] Sampah ...",
     description: "Sampah bertumpuk di area gudang tanpa penanganan sesuai SOP.", image_url: img,
@@ -117,7 +117,7 @@ export const mockHazards: HazardTask[] = [
     status: "auto_confirmed", reporter: "Dian P.", sla_deadline: deadline(8),
   },
   {
-    id: "7316163", timestamp: "2025-09-18 07:20", pic_perusahaan: "PT Arcistec ...", site: "BMO 2",
+    id: "7316163", timestamp: "2025-09-18 07:20", pic_perusahaan: "PT Arcistec Indonesia", pic_name: "Dedi Kurniawan", site: "BMO 2",
     lokasi: pickLokasi(0),
     detail_location: "Sump/void", ketidaksesuaian: "Perlengkapan_Mesi...", sub_ketidaksesuaian: "Pelepasan komponen...",
     description: "Box battery tidak terpasang cover, kabel terbuka dan berpotensi short circuit.", image_url: img,
@@ -139,7 +139,7 @@ export const mockHazards: HazardTask[] = [
     status: "ai_pending", reporter: "Eko W.", sla_deadline: deadline(72),
   },
   {
-    id: "7316601", timestamp: "2025-09-18 07:11", pic_perusahaan: "PT Berau Coal", site: "LMO",
+    id: "7316601", timestamp: "2025-09-18 07:11", pic_perusahaan: "PT Berau Coal", pic_name: "Yusuf Habibie", site: "LMO",
     lokasi: pickLokasi(1),
     detail_location: "Akses Masuk ...", ketidaksesuaian: "Kelengkapan tangg...", sub_ketidaksesuaian: "Alat Tanggap Darura...",
     description: "P2h unit dan alat tanggap darurat tidak lengkap di area loading.", image_url: img,
@@ -161,7 +161,7 @@ export const mockHazards: HazardTask[] = [
     status: "human_locked", reporter: "Faisal K.", sla_deadline: deadline(25),
   },
   {
-    id: "7315941", timestamp: "2025-09-18 06:55", pic_perusahaan: "PT Bukit Makmu...", site: "LMO",
+    id: "7315941", timestamp: "2025-09-18 06:55", pic_perusahaan: "PT Bukit Makmur Mandiri Utama", pic_name: "Hendro Susanto", site: "LMO",
     lokasi: pickLokasi(2),
     detail_location: "Area ...", ketidaksesuaian: "Perlengkapan_Mesi...", sub_ketidaksesuaian: "Penyesuaian/ ...",
     description: "Di temukan tyre aus melebihi batas pada unit HD785.", image_url: img,
@@ -183,7 +183,7 @@ export const mockHazards: HazardTask[] = [
     status: "ai_pending", reporter: "Gunawan T.", sla_deadline: deadline(110),
   },
   {
-    id: "7316617", timestamp: "2025-09-18 06:40", pic_perusahaan: "PT Kaltim ...", site: "BMO 1",
+    id: "7316617", timestamp: "2025-09-18 06:40", pic_perusahaan: "PT Kaltim Prima Coal", pic_name: "Andi Saputra", site: "BMO 1",
     lokasi: pickLokasi(3),
     detail_location: "Red Zone Jalan ...", ketidaksesuaian: "Standar Road ...", sub_ketidaksesuaian: "Drainase tersumbat ...",
     description: "Windrow tersumbat material longsor, akses jalan hauling terganggu.", image_url: img,
@@ -205,7 +205,7 @@ export const mockHazards: HazardTask[] = [
     status: "completed", reporter: "Hendra L.", sla_deadline: deadline(55),
   },
   {
-    id: "7315805", timestamp: "2025-09-18 06:30", pic_perusahaan: "PT Bukit Makmu...", site: "BMO 2",
+    id: "7315805", timestamp: "2025-09-18 06:30", pic_perusahaan: "PT Bukit Makmur Mandiri Utama", pic_name: "Wahyu Nugroho", site: "BMO 2",
     lokasi: pickLokasi(0),
     detail_location: "(B7) Jl. Lavender", ketidaksesuaian: "Perawatan Jalan", sub_ketidaksesuaian: "Boulder",
     description: "Terdapat tumpahan material di jalan hauling tanpa warning sign.", image_url: img,
@@ -227,7 +227,7 @@ export const mockHazards: HazardTask[] = [
     status: "auto_confirmed", reporter: "Irfan A.", sla_deadline: deadline(15),
   },
   {
-    id: "7316608", timestamp: "2025-09-18 06:15", pic_perusahaan: "PT Multi Ardecon", site: "MARINE",
+    id: "7316608", timestamp: "2025-09-18 06:15", pic_perusahaan: "PT Multi Ardecon", pic_name: "Fajar Hidayat", site: "MARINE",
     lokasi: pickLokasi(1),
     detail_location: "INTAN MEGAH ...", ketidaksesuaian: "Bahaya Eletrikal", sub_ketidaksesuaian: "Pengamanan ...",
     description: "Kabel belum di rapikan dan berpotensi tersandung di area workshop.", image_url: img,
