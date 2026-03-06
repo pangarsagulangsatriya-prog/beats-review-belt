@@ -435,6 +435,17 @@ const HazardTable = () => {
         filteredData={filtered}
         dateRange={dateRange}
         filters={filters}
+        onApplyToPage={(newDateRange, newFilters) => {
+          setDateRange(newDateRange);
+          setFilters(prev => ({
+            ...prev,
+            site: newFilters.site,
+            lokasi: newFilters.lokasi,
+            detail_location: newFilters.detail_location,
+            ketidaksesuaian: newFilters.ketidaksesuaian,
+            sub_ketidaksesuaian: newFilters.sub_ketidaksesuaian,
+          }));
+        }}
       />
 
       {/* Formula Bar */}
