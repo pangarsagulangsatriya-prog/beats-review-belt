@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { X, ZoomIn, Lock, User, Eye } from "lucide-react";
-import { HazardTask, AILabel, getCandidateLines } from "@/types/hazard";
+import { HazardTask, AILabel, getCandidateLines, summarizeReasoning } from "@/types/hazard";
 import StatusBadge from "./StatusBadge";
 import { Progress } from "@/components/ui/progress";
 
@@ -91,7 +91,9 @@ const TaskDrawer = ({ task, open, onClose }: TaskDrawerProps) => {
                     <span className="text-[10px] font-medium text-muted-foreground shrink-0 ml-2">{c.relevance}%</span>
                   </div>
                   <Progress value={c.relevance} className="h-1 mb-1" />
-                  <p className="text-[10px] text-muted-foreground leading-tight">{c.reasoning}</p>
+                  <ul className="text-[10px] text-muted-foreground leading-tight list-disc pl-3 space-y-0.5">
+                    {summarizeReasoning(c.reasoning).map((pt, pi) => <li key={pi}>{pt}</li>)}
+                  </ul>
                 </div>
                 );
               })}

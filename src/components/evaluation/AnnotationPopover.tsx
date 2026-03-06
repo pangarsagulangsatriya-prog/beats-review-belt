@@ -4,7 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AILabel, TBC_OPTIONS, getCandidateLines } from "@/types/hazard";
+import { AILabel, TBC_OPTIONS, getCandidateLines, summarizeReasoning } from "@/types/hazard";
 import AIBadge from "./AIBadge";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -306,7 +306,9 @@ const AnnotationPopover = ({ label, fieldName = "TBC", options, onApply, slaDead
                             </TooltipTrigger>
                             <TooltipContent side="left" className="max-w-[280px] text-[11px] p-3 leading-relaxed">
                               <p className="font-semibold mb-1">AI Reasoning</p>
-                              <p className="text-muted-foreground">{c.reasoning}</p>
+                               <ul className="text-muted-foreground space-y-0.5 list-disc pl-3">
+                                 {summarizeReasoning(c.reasoning).map((pt, pi) => <li key={pi}>{pt}</li>)}
+                               </ul>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
@@ -448,7 +450,9 @@ const AnnotationPopover = ({ label, fieldName = "TBC", options, onApply, slaDead
                           </TooltipTrigger>
                           <TooltipContent side="left" className="max-w-[280px] text-[11px] p-3 leading-relaxed">
                             <p className="font-semibold mb-1">AI Reasoning</p>
-                            <p className="text-muted-foreground">{c.reasoning}</p>
+                             <ul className="text-muted-foreground space-y-0.5 list-disc pl-3">
+                               {summarizeReasoning(c.reasoning).map((pt, pi) => <li key={pi}>{pt}</li>)}
+                             </ul>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
