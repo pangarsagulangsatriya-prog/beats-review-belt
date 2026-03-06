@@ -1,3 +1,21 @@
+/** Condense a long reasoning string into ≤3 short bullet points */
+export function summarizeReasoning(reasoning: string): string[] {
+  if (!reasoning) return [];
+  // Split by sentence-ending punctuation or period-space
+  const sentences = reasoning
+    .split(/(?<=[.!?])\s+/)
+    .map(s => s.trim())
+    .filter(s => s.length > 0);
+
+  if (sentences.length <= 3) {
+    return sentences.map(s => s.length > 80 ? s.slice(0, 77) + "…" : s);
+  }
+
+  // Take first, a middle, and last sentence, truncated
+  const pick = [sentences[0], sentences[Math.floor(sentences.length / 2)], sentences[sentences.length - 1]];
+  return pick.map(s => s.length > 80 ? s.slice(0, 77) + "…" : s);
+}
+
 export interface AICandidate {
   label: string;
   category?: string;
