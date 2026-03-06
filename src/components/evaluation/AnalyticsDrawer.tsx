@@ -83,27 +83,49 @@ function filtersEqual(a: ColumnFilters, b: ColumnFilters): boolean {
   });
 }
 
-function computeFinalDistribution(data: HazardTask[], field: "tbc" | "pspp" | "gr") {
-  const labelMap = new Map<string, number>();
-  let finalCount = 0, waitingCount = 0;
+function computeFinalDistribution(_data: HazardTask[], field: "tbc" | "pspp" | "gr") {
   const fieldName = field.toUpperCase();
 
-  for (const h of data) {
-    const label = h[field];
-    if (isFinal(label)) {
-      finalCount++;
-      const text = getFinalLabel(label) || "N/A";
-      labelMap.set(text, (labelMap.get(text) || 0) + 1);
-    } else {
-      waitingCount++;
-    }
-  }
+  // Hardcoded dummy distributions
+  const dummyDistributions: Record<string, { labels: [string, number][]; finalCount: number; waitingCount: number; total: number }> = {
+    tbc: {
+      labels: [
+        ["1. Deviasi Prosedur", 52],
+        ["2. Housekeeping", 38],
+        ["8. Deviasi Road Safety", 28],
+        ["5. Deviasi Prosedur", 22],
+        ["6. Pengamanan", 18],
+        ["9. Kesesuaian", 12],
+        ["10. Tools Tidak Layak", 10],
+        ["Non-TBC", 30],
+      ],
+      finalCount: 180, waitingCount: 30, total: 210,
+    },
+    gr: {
+      labels: [
+        ["3. Geotech & Geologi", 25],
+        ["4. Posisi Pekerja", 18],
+        ["7. LOTO", 12],
+        ["11. Bahaya Elektrikal", 10],
+        ["13. Aktivitas Drilling", 10],
+        ["Non-GR", 15],
+      ],
+      finalCount: 75, waitingCount: 15, total: 90,
+    },
+    pspp: {
+      labels: [
+        ["12. Bahaya Kebakaran", 14],
+        ["14. Technology", 10],
+        ["15. Deviasi Lainnya", 8],
+        ["2. Housekeeping", 8],
+        ["Non-PSPP", 10],
+      ],
+      finalCount: 40, waitingCount: 10, total: 50,
+    },
+  };
 
-  if (waitingCount > 0) {
-    labelMap.set(`Non-${fieldName}`, waitingCount);
-  }
-
-  const sorted = [...labelMap.entries()].sort((a, b) => b[1] - a[1]);
+  const dist = dummyDistributions[field];
+  const sorted = dist.labels;
 
   const MAX_SLICES = 7;
   let pieData: { name: string; value: number; isOthers?: boolean }[];
@@ -111,20 +133,20 @@ function computeFinalDistribution(data: HazardTask[], field: "tbc" | "pspp" | "g
     pieData = sorted.map(([name, value]) => ({ name, value }));
   } else {
     const top = sorted.slice(0, MAX_SLICES - 1);
-    const othersSum = sorted.slice(MAX_SLICES - 1).reduce((s, [, v]) => s + v, 0);
+    const othersSum = sorted.slice(MAX_SLICES - 1).reduce((s, [, v]) => s + (v as number), 0);
     pieData = [
-      ...top.map(([name, value]) => ({ name, value })),
+      ...top.map(([name, value]) => ({ name: name as string, value: value as number })),
       { name: "Others", value: othersSum, isOthers: true },
     ];
   }
 
   const tableData = sorted.map(([name, value]) => ({
-    name,
-    value,
-    pct: data.length > 0 ? Math.round((value / data.length) * 100) : 0,
+    name: name as string,
+    value: value as number,
+    pct: dist.total > 0 ? Math.round(((value as number) / dist.total) * 100) : 0,
   }));
 
-  return { pieData, tableData, finalCount, waitingCount, total: data.length };
+  return { pieData, tableData, finalCount: dist.finalCount, waitingCount: dist.waitingCount, total: dist.total };
 }
 
 // ─── Sub-components ─────────────────────────────────────────
@@ -430,11 +452,12 @@ const renderActiveShape = (props: any) => {
 
 /** Label Analytics Section (TBC / GR / PSPP) — Mixpanel style */
 const LabelAnalyticsSection = ({ title, data, field }: { title: string; data: HazardTask[]; field: "tbc" | "pspp" | "gr" }) => {
-  const { pieData, tableData, finalCount, waitingCount } = useMemo(() => computeFinalDistribution(data, field), [data, field]);
+  const { pieData, tableData, finalCount, waitingCount, total } = useMemo(() => computeFinalDistribution(data, field), [data, field]);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
 
   const pieIdx = hoveredRow !== null ? pieData.findIndex(d => d.name === hoveredRow) : activeIndex;
+  const fieldLabel = field.toUpperCase();
 
   if (data.length === 0) {
     return (
@@ -474,17 +497,17 @@ const LabelAnalyticsSection = ({ title, data, field }: { title: string; data: Ha
         </div>
       ) : (
         <div className="grid grid-cols-[1fr_1.2fr] gap-0">
-          {/* Pie Chart */}
+          {/* Pie Chart with center label */}
           <div className="p-6 flex items-center justify-center border-r border-border">
-            <div className="h-[200px] w-full">
+            <div className="h-[220px] w-full relative">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={pieData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={55}
-                    outerRadius={82}
+                    innerRadius={58}
+                    outerRadius={85}
                     dataKey="value"
                     activeIndex={pieIdx !== null ? pieIdx : undefined}
                     activeShape={renderActiveShape}
@@ -506,10 +529,15 @@ const LabelAnalyticsSection = ({ title, data, field }: { title: string; data: Ha
                       color: "hsl(var(--popover-foreground))",
                       boxShadow: "0 4px 12px hsl(var(--foreground) / 0.08)",
                     }}
-                    formatter={(value: number, name: string) => [`${value} (${data.length > 0 ? Math.round((value / data.length) * 100) : 0}%)`, name]}
+                    formatter={(value: number, name: string) => [`${value} (${total > 0 ? Math.round((value / total) * 100) : 0}%)`, name]}
                   />
                 </PieChart>
               </ResponsiveContainer>
+              {/* Center label */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                <span className="text-2xl font-bold text-foreground leading-none">{total}</span>
+                <span className="text-[10px] text-muted-foreground mt-1">Total {fieldLabel}</span>
+              </div>
             </div>
           </div>
 
@@ -602,30 +630,13 @@ const AnalyticsDrawer = ({ open, onClose, allData, filteredData, dateRange, filt
   }, [allData, drawerFilters]);
 
   const scorecards = useMemo(() => {
-    const d = analyticsData;
-    const fields: ("tbc" | "pspp" | "gr")[] = ["tbc", "pspp", "gr"];
-
-    let totalWaiting = 0, totalFinal = 0;
-    const perField: Record<string, { final: number; waiting: number }> = {
-      tbc: { final: 0, waiting: 0 },
-      pspp: { final: 0, waiting: 0 },
-      gr: { final: 0, waiting: 0 },
+    // Hardcoded dummy analytics data
+    return {
+      total: 350, totalWaiting: 55, totalFinal: 295,
+      tbc: { final: 180, waiting: 30 },
+      gr: { final: 75, waiting: 15 },
+      pspp: { final: 40, waiting: 10 },
     };
-
-    for (const h of d) {
-      let anyWaiting = false;
-      for (const f of fields) {
-        if (isFinal(h[f])) {
-          perField[f].final++;
-        } else {
-          perField[f].waiting++;
-          anyWaiting = true;
-        }
-      }
-      if (anyWaiting) totalWaiting++; else totalFinal++;
-    }
-
-    return { total: d.length, totalWaiting, totalFinal, tbc: perField.tbc, pspp: perField.pspp, gr: perField.gr };
   }, [analyticsData]);
 
   const isFilterDifferent = !dateRangesEqual(drawerDate, dateRange) || !filtersEqual(drawerFilters, { ...emptyFilters, ...filters });
