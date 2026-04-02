@@ -1,5 +1,5 @@
-import { useState, useCallback, useEffect, useMemo } from "react";
-import { Eye, Brain, ArrowUp, ArrowDown, ChevronsUpDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useCallback, useEffect, useMemo, ReactNode } from "react";
+import { Eye, EyeOff, Brain, ArrowUp, ArrowDown, ChevronsUpDown, ChevronLeft, ChevronRight, GripVertical, Settings2, Search, X, Check, RefreshCcw, Lock, Briefcase, ArrowRightToLine, ChevronDown, Info, CheckCircle2, Columns, Rows, Anchor } from "lucide-react";
 import { HazardTask, AILabel } from "@/types/hazard";
 import { mockHazards } from "@/data/mockHazards";
 import AnnotationPopover from "./AnnotationPopover";
@@ -8,6 +8,7 @@ import TaskDrawer from "./TaskDrawer";
 import LabelColumnHeader, { LabelFilterValue, LabelSortValue } from "./LabelColumnHeader";
 import DateFilter, { DateRange } from "./DateFilter";
 import AnalyticsDrawer from "./AnalyticsDrawer";
+import { InstrumentDrawer } from "./InstrumentDrawer";
 import { startOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -53,10 +54,21 @@ const ImageCell = ({ src }: { src: string }) => (
   <TooltipProvider delayDuration={200}>
     <Tooltip>
       <TooltipTrigger asChild>
-        <img src={src} alt="hazard" className="w-9 h-9 rounded-md object-cover cursor-pointer hover:ring-2 hover:ring-primary/30 transition-all shadow-sm" />
+        <div className="relative group/img-cell shrink-0">
+          <div className="w-11 h-11 rounded-[6px] border border-border bg-muted/20 overflow-hidden transition-all group-hover/img-cell:border-primary/50 shadow-xs">
+            <img 
+              src={src} 
+              alt="hazard" 
+              className="w-full h-full object-cover cursor-pointer hover:scale-110 transition-transform duration-500" 
+            />
+          </div>
+          <div className="absolute inset-0 rounded-[6px] ring-1 ring-inset ring-black/5 pointer-events-none" />
+        </div>
       </TooltipTrigger>
-      <TooltipContent side="right" className="p-1 w-[220px]" align="center">
-        <img src={src} alt="hazard preview" className="w-full rounded-md object-cover" />
+      <TooltipContent side="right" className="p-0.5 w-[280px] rounded-[8px] border-border shadow-2xl bg-popover" align="center">
+        <div className="aspect-square w-full overflow-hidden rounded-[6px]">
+          <img src={src} alt="hazard preview" className="w-full h-full object-cover" />
+        </div>
       </TooltipContent>
     </Tooltip>
   </TooltipProvider>
@@ -71,22 +83,30 @@ interface SortState {
   dir: SortDir;
 }
 
+interface ColumnDef {
+  id: string;
+  key: SortKey | null;
+  label: string;
+  sortable: boolean;
+  isCritical?: boolean;
+}
+
 // Column definitions for sortable headers
-const COLUMNS = [
-  { key: null, label: "Task ID", sortable: false },
-  { key: "timestamp" as SortKey, label: "Timestamp", sortable: true },
-  { key: null, label: "PIC Perusahaan", sortable: false },
-  { key: "site" as SortKey, label: "Site", sortable: true },
-  { key: "lokasi" as SortKey, label: "Lokasi", sortable: true },
-  { key: null, label: "Detail Location", sortable: false },
-  { key: null, label: "Ketidaksesuaian", sortable: false },
-  { key: null, label: "Sub Ketidaksesuaian", sortable: false },
-  { key: null, label: "Description", sortable: false },
-  { key: null, label: "Img", sortable: false },
-  { key: "tbc_rel" as SortKey, label: "TBC", sortable: true },
-  { key: "pspp_rel" as SortKey, label: "PSPP", sortable: true },
-  { key: "gr_rel" as SortKey, label: "GR", sortable: true },
-  { key: "time_left" as SortKey, label: "Detail", sortable: false },
+const COLUMNS: ColumnDef[] = [
+  { id: "id", key: null, label: "Task ID", sortable: false, isCritical: true },
+  { id: "timestamp", key: "timestamp" as SortKey, label: "Timestamp", sortable: true },
+  { id: "pic", key: null, label: "PIC Perusahaan", sortable: false },
+  { id: "site", key: "site" as SortKey, label: "Site", sortable: true },
+  { id: "lokasi", key: "lokasi" as SortKey, label: "Lokasi", sortable: true },
+  { id: "detail_location", key: null, label: "Detail Location", sortable: false },
+  { id: "ketidaksesuaian", key: null, label: "Ketidaksesuaian", sortable: false },
+  { id: "sub_ketidaksesuaian", key: null, label: "Sub Ketidaksesuaian", sortable: false },
+  { id: "description", key: null, label: "Description", sortable: false },
+  { id: "img", key: null, label: "Img", sortable: false },
+  { id: "tbc", key: "tbc_rel" as SortKey, label: "TBC", sortable: true },
+  { id: "pspp", key: "pspp_rel" as SortKey, label: "PSPP", sortable: true },
+  { id: "gr", key: "gr_rel" as SortKey, label: "GR", sortable: true },
+  { id: "action", key: "time_left" as SortKey, label: "Detail", sortable: false, isCritical: true },
 ];
 
 const PAGE_SIZE = 10;
@@ -102,12 +122,23 @@ const HazardTable = () => {
   const [filters, setFilters] = useState<ColumnFilters>(emptyFilters);
   const [drawerTask, setDrawerTask] = useState<HazardTask | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [instrumentPanelOpen, setInstrumentPanelOpen] = useState(false);
   const [activeRowId, setActiveRowId] = useState<string | null>(null);
-  const [activeColIdx, setActiveColIdx] = useState<number | null>(null);
+  const [activeColId, setActiveColId] = useState<string | null>(null);
   const [editingLabel, setEditingLabel] = useState<{ taskId: string; field: "tbc" | "pspp" | "gr" } | null>(null);
   const [sort, setSort] = useState<SortState>({ key: null, dir: null });
-  const [hoverColIdx, setHoverColIdx] = useState<number | null>(null);
+  const [hoverColId, setHoverColId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [visibleColumnIds, setVisibleColumnIds] = useState<string[]>(() => {
+    const saved = localStorage.getItem("hazardVisibleColumns");
+    return saved ? JSON.parse(saved) : COLUMNS.map(c => c.id);
+  });
+  const [freezeColumns, setFreezeColumns] = useState<number>(1);
+  const [rowHeight, setRowHeight] = useState<number>(1);
+
+  useEffect(() => {
+    localStorage.setItem("hazardVisibleColumns", JSON.stringify(visibleColumnIds));
+  }, [visibleColumnIds]);
 
   // Per-column label filter & sort
   const [labelFilters, setLabelFilters] = useState<Record<"tbc" | "pspp" | "gr", LabelFilterValue>>({
@@ -313,10 +344,10 @@ const HazardTable = () => {
   const toggleActiveRow = (taskId: string) => {
     if (activeRowId === taskId) {
       setActiveRowId(null);
-      setActiveColIdx(null);
+      setActiveColId(null);
     } else {
       setActiveRowId(taskId);
-      setActiveColIdx(null);
+      setActiveColId(null);
     }
   };
 
@@ -331,7 +362,7 @@ const HazardTable = () => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       if (e.key === "Escape" && drawerOpen) { setDrawerOpen(false); return; }
       if (e.key === "Escape" && editingLabel) { setEditingLabel(null); return; }
-      if (e.key === "Escape" && activeRowId) { setActiveRowId(null); setActiveColIdx(null); return; }
+      if (e.key === "Escape" && activeRowId) { setActiveRowId(null); setActiveColId(null); return; }
 
       if (activeRowId && (e.key === "ArrowDown" || e.key === "j")) {
         e.preventDefault();
@@ -346,10 +377,16 @@ const HazardTable = () => {
         if (prev) setActiveRowId(prev.id);
       }
       if (activeRowId && e.key === "ArrowRight") {
-        setActiveColIdx(prev => Math.min((prev ?? -1) + 1, 13));
+        const visibleCols = COLUMNS.filter(c => visibleColumnIds.includes(c.id));
+        const idx = visibleCols.findIndex(c => c.id === activeColId);
+        const next = visibleCols[idx + 1];
+        if (next) setActiveColId(next.id);
       }
       if (activeRowId && e.key === "ArrowLeft") {
-        setActiveColIdx(prev => Math.max((prev ?? 1) - 1, 0));
+        const visibleCols = COLUMNS.filter(c => visibleColumnIds.includes(c.id));
+        const idx = visibleCols.findIndex(c => c.id === activeColId);
+        const prev = visibleCols[idx - 1];
+        if (prev) setActiveColId(prev.id);
       }
       if (activeRowId && e.key === "Enter") {
         const row = paginatedData.find(h => h.id === activeRowId);
@@ -385,20 +422,20 @@ const HazardTable = () => {
   };
 
   // Map column index to field name for formula bar
-  const COLUMN_FIELD_MAP: Record<number, { label: string; key: keyof HazardTask }> = {
-    0: { label: "Task ID", key: "id" },
-    1: { label: "Timestamp", key: "timestamp" },
-    2: { label: "PIC Perusahaan", key: "pic_perusahaan" },
-    3: { label: "Site", key: "site" },
-    4: { label: "Lokasi", key: "lokasi" },
-    5: { label: "Detail Location", key: "detail_location" },
-    6: { label: "Ketidaksesuaian", key: "ketidaksesuaian" },
-    7: { label: "Sub Ketidaksesuaian", key: "sub_ketidaksesuaian" },
-    8: { label: "Description", key: "description" },
+  const COLUMN_FIELD_MAP: Record<string, { label: string; key: keyof HazardTask }> = {
+    id: { label: "Task ID", key: "id" },
+    timestamp: { label: "Timestamp", key: "timestamp" },
+    pic: { label: "PIC Perusahaan", key: "pic_perusahaan" },
+    site: { label: "Site", key: "site" },
+    lokasi: { label: "Lokasi", key: "lokasi" },
+    detail_location: { label: "Detail Location", key: "detail_location" },
+    ketidaksesuaian: { label: "Ketidaksesuaian", key: "ketidaksesuaian" },
+    sub_ketidaksesuaian: { label: "Sub Ketidaksesuaian", key: "sub_ketidaksesuaian" },
+    description: { label: "Description", key: "description" },
   };
 
-  const formulaField = activeColIdx !== null && COLUMN_FIELD_MAP[activeColIdx]
-    ? COLUMN_FIELD_MAP[activeColIdx]
+  const formulaField = activeColId !== null && COLUMN_FIELD_MAP[activeColId]
+    ? COLUMN_FIELD_MAP[activeColId]
     : { label: "Description", key: "description" as keyof HazardTask };
 
   return (
@@ -426,6 +463,9 @@ const HazardTable = () => {
         filterOptions={filterOptions}
         dateFilter={<DateFilter dateRange={dateRange} onDateRangeChange={setDateRange} />}
         onOpenAnalytics={() => setAnalyticsOpen(true)}
+        onOpenColumns={() => setInstrumentPanelOpen(true)}
+        visibleCount={visibleColumnIds.length}
+        totalCount={COLUMNS.length}
       />
 
       <AnalyticsDrawer
@@ -457,7 +497,7 @@ const HazardTable = () => {
           <div className="h-3.5 w-px bg-border shrink-0" />
           <div className="flex items-center gap-2 flex-1 min-w-0">
             <span className="text-muted-foreground shrink-0 font-medium text-[10px] uppercase tracking-wider">{formulaField.label}</span>
-            <span className="text-foreground flex-1 min-w-0 truncate text-[11px]">{String(activeRow[formulaField.key])}</span>
+            <span className="text-foreground flex-1 min-w-0 truncate text-[11px]">{activeRow ? String(activeRow[formulaField.key]) : ""}</span>
           </div>
           <div className="flex items-center gap-1.5 shrink-0 text-[10px] text-muted-foreground">
             <span>{activeRow.pic_perusahaan} – {activeRow.pic_name}</span>
@@ -468,8 +508,7 @@ const HazardTable = () => {
           </div>
         </div>
       )}
-
-      {/* Spreadsheet Table */}
+            {/* Spreadsheet Table */}
       <div className={cn(
         "bg-card border border-border overflow-hidden",
         activeRow ? "rounded-b-md border-t-0" : "rounded-md"
@@ -478,23 +517,32 @@ const HazardTable = () => {
           <table className="w-full text-[11px] border-collapse" style={{ borderSpacing: 0 }}>
             <thead>
               <tr className="bg-muted/50">
-                <th className="text-center px-2 py-2 font-medium text-muted-foreground border-b border-r border-border w-[36px] text-[10px]">#</th>
-                {COLUMNS.map((col, i) => {
+                <th className="sticky left-0 z-30 text-center px-1 py-3 font-medium text-muted-foreground border-b border-r border-border w-[40px] min-w-[40px] bg-muted/60 text-[10px] uppercase shadow-[2px_0_4px_-1px_rgba(0,0,0,0.05)]">#</th>
+                {COLUMNS.filter(c => visibleColumnIds.includes(c.id)).map((col, idx) => {
                     const labelField = col.key === "tbc_rel" ? "tbc" as const : col.key === "pspp_rel" ? "pspp" as const : col.key === "gr_rel" ? "gr" as const : null;
+                    const isFrozen = idx < freezeColumns;
+                    const leftOffset = idx === 0 ? "40px" : idx === 1 ? "170px" : "310px";
+                    const colWidth = idx === 0 ? "w-[130px] min-w-[130px]" : idx === 1 ? "w-[140px] min-w-[140px]" : "";
+                    const isLastFrozen = idx === freezeColumns - 1;
+
                     return (
                     <th
-                      key={col.label}
+                      key={col.id}
                       className={cn(
-                        "text-left px-3 py-2 font-semibold text-muted-foreground whitespace-nowrap border-b border-r border-border last:border-r-0 group transition-colors text-[10px] uppercase tracking-wider",
+                        "text-left px-3 py-3 font-semibold text-muted-foreground whitespace-nowrap border-b border-r border-border last:border-r-0 group transition-colors text-[10px] uppercase tracking-wider relative",
+                        isFrozen && "sticky z-20 bg-muted/60",
+                        isLastFrozen && "shadow-[4px_0_8px_-2px_rgba(0,0,0,0.08)]",
+                        colWidth,
                         col.sortable && !labelField && "cursor-pointer select-none hover:bg-muted/90",
-                        activeColIdx === i && "bg-primary/[0.06]",
-                        hoverColIdx === i && "bg-muted/90",
+                        activeColId === col.id && "bg-primary/[0.06]",
+                        hoverColId === col.id && "bg-muted/90",
                         sort.key === col.key && sort.dir && "bg-primary/[0.04]",
                         labelField && labelFilters[labelField] !== "all" && "bg-primary/[0.04]"
                       )}
+                      style={isFrozen ? { left: leftOffset } : {}}
                       onClick={() => col.sortable && !labelField && handleSort(col.key)}
-                      onMouseEnter={() => setHoverColIdx(i)}
-                      onMouseLeave={() => setHoverColIdx(null)}
+                      onMouseEnter={() => setHoverColId(col.id)}
+                      onMouseLeave={() => setHoverColId(null)}
                     >
                       {labelField ? (
                         <LabelColumnHeader
@@ -503,14 +551,12 @@ const HazardTable = () => {
                           sort={labelSorts[labelField]}
                           onFilterChange={(v) => setLabelFilters(prev => ({ ...prev, [labelField]: v }))}
                           onSortChange={(v) => {
-                            // Clear other label sorts when setting one
                             setLabelSorts({ tbc: null, pspp: null, gr: null, [labelField]: v });
-                            // Clear global sort when label sort is active
                             if (v) setSort({ key: null, dir: null });
                           }}
                         />
                       ) : (
-                        <div className="flex items-center gap-1">
+                        <div className={cn("truncate flex items-center gap-1", colWidth)}>
                           <span>{col.label}</span>
                           {col.sortable && renderSortIcon(col.key)}
                         </div>
@@ -520,42 +566,28 @@ const HazardTable = () => {
                 })}
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-border/20">
               {paginatedData.map((h, rowIndex) => {
-                const minRelevance = getMinRelevance(h);
-                const hoursLeft = getHoursLeft(h.sla_deadline);
-                const isLowRelevance = minRelevance < 70 && h.status !== "completed" && h.status !== "auto_confirmed";
-                const isUrgent = hoursLeft < 6 && h.status !== "completed" && h.status !== "auto_confirmed";
                 const isActive = activeRowId === h.id;
                 const isBeingEdited = editingLabel?.taskId === h.id;
+                const isLowRelevance = getMinRelevance(h) < 70;
+                const isUrgent = getHoursLeft(h.sla_deadline) < 8;
                 const isDimmed = isEditingRow && !isBeingEdited;
                 const expanded = isRowExpanded(h.id);
 
-                const cellClass = (colIdx: number) => cn(
+                const cellClass = (colId: string) => cn(
                   "px-3 py-2 border-r border-b border-border last:border-r-0",
-                  expanded ? "whitespace-normal" : "whitespace-nowrap",
-                  activeColIdx === colIdx && !isActive && "bg-primary/[0.03]",
-                  isActive && activeColIdx === colIdx && "ring-2 ring-inset ring-primary/40",
-                  hoverColIdx === colIdx && !isActive && "bg-muted/[0.02]"
+                  expanded ? "whitespace-normal overflow-visible" : "whitespace-nowrap overflow-hidden",
+                  activeColId === colId && !isActive && "bg-primary/[0.03]",
+                  isActive && activeColId === colId && "ring-2 ring-inset ring-primary/40",
+                  hoverColId === colId && !isActive && "bg-muted/[0.02]"
                 );
-
-                const labelCellClass = (colIdx: number, field: "tbc" | "pspp" | "gr") => {
-                  const isThisEditing = editingLabel?.taskId === h.id && editingLabel?.field === field;
-                  const isOtherEditing = editingLabel && (editingLabel.taskId !== h.id || editingLabel.field !== field);
-                  return cn(
-                    cellClass(colIdx),
-                    "whitespace-nowrap transition-all duration-200",
-                    isThisEditing && "bg-primary/[0.06] ring-1 ring-inset ring-primary/20 shadow-[inset_0_-2px_0_hsl(var(--primary))] relative z-10",
-                    isOtherEditing && isBeingEdited && "opacity-40"
-                  );
-                };
 
                 const globalRowIndex = (currentPage - 1) * PAGE_SIZE + rowIndex + 1;
 
-                // When label is clicked, activate that row
                 const handleLabelOpen = (taskId: string, field: "tbc" | "pspp" | "gr") => {
                   setActiveRowId(taskId);
-                  setActiveColIdx(null);
+                  setActiveColId(null);
                   setEditingLabel({ taskId, field });
                 };
 
@@ -565,7 +597,8 @@ const HazardTable = () => {
                     data-active={isActive ? "true" : undefined}
                     onClick={() => toggleActiveRow(h.id)}
                     className={cn(
-                      "transition-all duration-200 cursor-pointer",
+                      "transition-all duration-200 cursor-pointer border-b border-border/30 group/row",
+                      rowHeight === 1 ? "h-14" : rowHeight === 2 ? "h-20" : "h-28",
                       !isActive && isLowRelevance && !isDimmed && "bg-destructive/[0.03]",
                       !isActive && isUrgent && !isLowRelevance && !isDimmed && "bg-warning/[0.03]",
                       !isActive && !isDimmed && "hover:bg-muted/40",
@@ -574,140 +607,128 @@ const HazardTable = () => {
                       isDimmed && "opacity-30 blur-[0.3px] transition-all duration-300"
                     )}
                   >
-                    {/* Row index */}
+                    {/* Row index - STICKY */}
                     <td className={cn(
-                      "text-center px-2 py-2 font-mono text-[10px] text-muted-foreground border-r border-b border-border bg-muted/30",
-                      isActive && "bg-primary/10 text-primary font-semibold"
+                      "sticky left-0 z-20 text-center px-1 py-1 font-mono text-[10px] text-muted-foreground border-r border-border bg-card transition-colors w-[40px] min-w-[40px] shadow-[2px_0_4px_-1px_rgba(0,0,0,0.05)]",
+                      isActive && "bg-primary/5 text-primary font-semibold"
                     )}>
                       {globalRowIndex}
                     </td>
-                    <td className={cellClass(0)} onClick={(e) => { e.stopPropagation(); toggleActiveRow(h.id); setActiveColIdx(0); }}>
-                      <div className="flex items-center gap-1.5 font-medium text-foreground">
-                        {isLowRelevance && <span className="w-1.5 h-1.5 rounded-full bg-destructive shrink-0" />}
-                        {h.id}
-                      </div>
-                    </td>
-                    <td className={cn(cellClass(1), "text-muted-foreground")} onClick={(e) => { e.stopPropagation(); toggleActiveRow(h.id); setActiveColIdx(1); }}>
-                      {h.timestamp}
-                    </td>
-                    <td className={cellClass(2)} onClick={(e) => { e.stopPropagation(); toggleActiveRow(h.id); setActiveColIdx(2); }}>
-                      <div className="flex flex-col leading-tight">
-                        <span className={cn("text-[11px] font-medium text-foreground", !expanded && "truncate max-w-[130px]")}>{h.pic_perusahaan}</span>
-                        <span className={cn("text-[10px] font-normal text-muted-foreground", !expanded && "truncate max-w-[130px]")}>{h.pic_name}</span>
-                      </div>
-                    </td>
-                    <td className={cn(cellClass(3), "text-foreground")} onClick={(e) => { e.stopPropagation(); toggleActiveRow(h.id); setActiveColIdx(3); }}>
-                      {h.site}
-                    </td>
-                    <td className={cn(cellClass(4), "text-foreground")} onClick={(e) => { e.stopPropagation(); toggleActiveRow(h.id); setActiveColIdx(4); }}>
-                      {h.lokasi}
-                    </td>
-                    <td className={cn(cellClass(5), "text-muted-foreground")} onClick={(e) => { e.stopPropagation(); toggleActiveRow(h.id); setActiveColIdx(5); }}>
-                      {expanded ? <span>{h.detail_location}</span> : <TruncatedCell text={h.detail_location} maxWidth="max-w-[120px]" />}
-                    </td>
-                    <td className={cn(cellClass(6), "text-muted-foreground")} onClick={(e) => { e.stopPropagation(); toggleActiveRow(h.id); setActiveColIdx(6); }}>
-                      {expanded ? <span>{h.ketidaksesuaian}</span> : <TruncatedCell text={h.ketidaksesuaian} />}
-                    </td>
-                    <td className={cn(cellClass(7), "text-muted-foreground")} onClick={(e) => { e.stopPropagation(); toggleActiveRow(h.id); setActiveColIdx(7); }}>
-                      {expanded ? <span>{h.sub_ketidaksesuaian}</span> : <TruncatedCell text={h.sub_ketidaksesuaian} />}
-                    </td>
-                    <td className={cn(cellClass(8), "text-muted-foreground")} onClick={(e) => { e.stopPropagation(); toggleActiveRow(h.id); setActiveColIdx(8); }}>
-                      {expanded ? <span>{h.description}</span> : <TruncatedCell text={h.description} maxWidth="max-w-[150px]" />}
-                    </td>
-                    <td className={cellClass(9)} onClick={(e) => e.stopPropagation()}>
-                      <ImageCell src={h.image_url} />
-                    </td>
-                    <td className={labelCellClass(10, "tbc")} onClick={(e) => e.stopPropagation()}>
-                      <div className="relative">
-                        {editingLabel?.taskId === h.id && editingLabel?.field === "tbc" && (
-                          <span className="absolute -top-1 -right-1 text-[8px] text-muted-foreground font-medium bg-muted px-1 rounded z-10">
-                            <Eye className="w-2.5 h-2.5 inline" />
-                          </span>
-                        )}
-                        <AnnotationPopover
-                          label={h.tbc}
-                          fieldName="TBC"
-                          slaDeadline={h.sla_deadline}
-                          onApply={(lbl, note) => updateLabel(h.id, "tbc", lbl, note)}
-                          disabled={editingLabel !== null && !(editingLabel.taskId === h.id && editingLabel.field === "tbc")}
-                          editingBy={editingLabel?.taskId === h.id && editingLabel?.field === "tbc" ? null : editingLabel ? "FAUZAN AJI" : null}
-                          onOpenChange={(isOpen) => {
-                            if (isOpen) handleLabelOpen(h.id, "tbc");
-                            else if (editingLabel?.taskId === h.id && editingLabel?.field === "tbc") setEditingLabel(null);
+                    {COLUMNS.filter(c => visibleColumnIds.includes(c.id)).map((col, idx) => {
+                      const isFrozen = idx < freezeColumns;
+                      const leftOffset = idx === 0 ? "40px" : idx === 1 ? "170px" : "310px";
+                      const colWidth = idx === 0 ? "w-[130px] min-w-[130px]" : idx === 1 ? "w-[140px] min-w-[140px]" : "";
+                      const isLastFrozen = idx === freezeColumns - 1;
+                      
+                      const cellClasses = cn(
+                        cellClass(col.id),
+                        isFrozen && "sticky z-10 bg-card border-r border-border/40",
+                        isLastFrozen && "shadow-[4px_0_8px_-2px_rgba(0,0,0,0.06)]",
+                        isActive && isFrozen && "bg-primary/[0.04]",
+                        isBeingEdited && isFrozen && "bg-primary/[0.08]"
+                      );
+
+                      const renderCellContent = () => {
+                        switch(col.id) {
+                          case "id": return (
+                            <div className="flex items-center gap-1.5 font-medium text-foreground">
+                              {isLowRelevance && <span className="w-1.5 h-1.5 rounded-full bg-destructive shrink-0" />}
+                              {h.id}
+                            </div>
+                          );
+                          case "timestamp": return <span className="text-muted-foreground">{h.timestamp}</span>;
+                          case "pic": return (
+                            <div className="flex flex-col leading-tight">
+                              <span className={cn("text-[11px] font-medium text-foreground", !expanded && "truncate max-w-[130px]")}>{h.pic_perusahaan}</span>
+                              <span className={cn("text-[10px] font-normal text-muted-foreground", !expanded && "truncate max-w-[130px]")}>{h.pic_name}</span>
+                            </div>
+                          );
+                          case "site": return h.site;
+                          case "lokasi": return h.lokasi;
+                          case "detail_location": return expanded ? <span>{h.detail_location}</span> : <TruncatedCell text={h.detail_location} maxWidth="max-w-[120px]" />;
+                          case "ketidaksesuaian": return expanded ? <span>{h.ketidaksesuaian}</span> : <TruncatedCell text={h.ketidaksesuaian} />;
+                          case "sub_ketidaksesuaian": return expanded ? <span>{h.sub_ketidaksesuaian}</span> : <TruncatedCell text={h.sub_ketidaksesuaian} />;
+                          case "description": return expanded ? <span>{h.description}</span> : <TruncatedCell text={h.description} maxWidth="max-w-[150px]" />;
+                          case "img": return <ImageCell src={h.image_url} />;
+                          case "tbc": case "pspp": case "gr": {
+                            const field = col.id as "tbc" | "pspp" | "gr";
+                            return (
+                              <div className="relative">
+                                {editingLabel?.taskId === h.id && editingLabel?.field === field && (
+                                  <span className="absolute -top-1 -right-1 text-[8px] text-muted-foreground font-medium bg-muted px-1 rounded z-10">
+                                    <Eye className="w-2.5 h-2.5 inline" />
+                                  </span>
+                                )}
+                                <AnnotationPopover
+                                  label={h[field]}
+                                  fieldName={col.label}
+                                  slaDeadline={h.sla_deadline}
+                                  onApply={(lbl, note) => updateLabel(h.id, field, lbl, note)}
+                                  disabled={editingLabel !== null && !(editingLabel.taskId === h.id && editingLabel.field === field)}
+                                  editingBy={editingLabel?.taskId === h.id && editingLabel?.field === field ? null : editingLabel ? "FAUZAN AJI" : null}
+                                  onOpenChange={(isOpen) => {
+                                    if (isOpen) handleLabelOpen(h.id, field);
+                                    else if (editingLabel?.taskId === h.id && editingLabel?.field === field) setEditingLabel(null);
+                                  }}
+                                />
+                              </div>
+                            );
+                          }
+                          case "action": return (
+                            <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
+                              <button
+                                onClick={() => openDrawer(h)}
+                                className="p-1 px-2 rounded-md border border-border bg-card text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-all shadow-sm flex items-center gap-1"
+                              >
+                                <Eye className="w-3.5 h-3.5" />
+                                <span>View</span>
+                              </button>
+                              <button className="p-1 px-2 rounded-md border border-primary/20 bg-primary/5 text-[10px] font-medium text-primary hover:bg-primary/10 transition-all shadow-sm flex items-center gap-1">
+                                <Brain className="w-3.5 h-3.5" />
+                                <span>AI</span>
+                              </button>
+                            </div>
+                          );
+                          default: return null;
+                        }
+                      };
+
+                      return (
+                        <td 
+                          key={col.id} 
+                          className={cellClasses}
+                          style={isFrozen ? { left: leftOffset } : {}}
+                          onClick={(e) => {
+                            if (col.id === "action" || ["tbc", "pspp", "gr"].includes(col.id)) return;
+                            e.stopPropagation();
+                            toggleActiveRow(h.id);
+                            setActiveColId(col.id);
                           }}
-                        />
-                      </div>
-                    </td>
-                    <td className={labelCellClass(11, "pspp")} onClick={(e) => e.stopPropagation()}>
-                      <div className="relative">
-                        {editingLabel?.taskId === h.id && editingLabel?.field === "pspp" && (
-                          <span className="absolute -top-1 -right-1 text-[8px] text-muted-foreground font-medium bg-muted px-1 rounded z-10">
-                            <Eye className="w-2.5 h-2.5 inline" />
-                          </span>
-                        )}
-                        <AnnotationPopover
-                          label={h.pspp}
-                          fieldName="PSPP"
-                          slaDeadline={h.sla_deadline}
-                          onApply={(lbl, note) => updateLabel(h.id, "pspp", lbl, note)}
-                          disabled={editingLabel !== null && !(editingLabel.taskId === h.id && editingLabel.field === "pspp")}
-                          editingBy={editingLabel?.taskId === h.id && editingLabel?.field === "pspp" ? null : editingLabel ? "FAUZAN AJI" : null}
-                          onOpenChange={(isOpen) => {
-                            if (isOpen) handleLabelOpen(h.id, "pspp");
-                            else if (editingLabel?.taskId === h.id && editingLabel?.field === "pspp") setEditingLabel(null);
-                          }}
-                        />
-                      </div>
-                    </td>
-                    <td className={labelCellClass(12, "gr")} onClick={(e) => e.stopPropagation()}>
-                      <div className="relative">
-                        {editingLabel?.taskId === h.id && editingLabel?.field === "gr" && (
-                          <span className="absolute -top-1 -right-1 text-[8px] text-muted-foreground font-medium bg-muted px-1 rounded z-10">
-                            <Eye className="w-2.5 h-2.5 inline" />
-                          </span>
-                        )}
-                        <AnnotationPopover
-                          label={h.gr}
-                          fieldName="GR"
-                          slaDeadline={h.sla_deadline}
-                          onApply={(lbl, note) => updateLabel(h.id, "gr", lbl, note)}
-                          disabled={editingLabel !== null && !(editingLabel.taskId === h.id && editingLabel.field === "gr")}
-                          editingBy={editingLabel?.taskId === h.id && editingLabel?.field === "gr" ? null : editingLabel ? "FAUZAN AJI" : null}
-                          onOpenChange={(isOpen) => {
-                            if (isOpen) handleLabelOpen(h.id, "gr");
-                            else if (editingLabel?.taskId === h.id && editingLabel?.field === "gr") setEditingLabel(null);
-                          }}
-                        />
-                      </div>
-                    </td>
-                    <td className={cn(cellClass(13), "border-r-0 whitespace-nowrap")} onClick={(e) => e.stopPropagation()}>
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          onClick={() => openDrawer(h)}
-                          className="inline-flex items-center gap-1 px-2 py-1 rounded-md border border-border bg-card text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted hover:border-muted-foreground/20 transition-all shadow-sm"
                         >
-                          <Eye className="w-3.5 h-3.5" />
-                        </button>
-                        <button className="inline-flex items-center gap-1 px-2 py-1 rounded-md border border-primary/20 bg-primary/5 text-[10px] font-medium text-primary hover:bg-primary/10 hover:border-primary/30 transition-all shadow-sm">
-                          <Brain className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </td>
+                          <div className={cn("truncate", colWidth)}>
+                            {renderCellContent()}
+                          </div>
+                        </td>
+                      );
+                    })}
                   </tr>
                 );
               })}
               {paginatedData.length === 0 && (
                 <tr>
-                  <td colSpan={COLUMNS.length + 1} className="text-center py-8 text-muted-foreground text-xs">
-                    <p>No items found for this filter.</p>
-                    {(labelFilters.tbc !== "all" || labelFilters.pspp !== "all" || labelFilters.gr !== "all") && (
-                      <button
-                        onClick={() => setLabelFilters({ tbc: "all", pspp: "all", gr: "all" })}
-                        className="mt-2 text-primary hover:underline text-[11px] font-medium"
-                      >
-                        Clear all label filters
-                      </button>
-                    )}
+                  <td colSpan={visibleColumnIds.length + 1} className="text-center py-12 text-muted-foreground text-xs bg-muted/5">
+                    <div className="flex flex-col items-center gap-2">
+                       <Info className="w-5 h-5 opacity-20" />
+                       <p>No tasks identified for current parameters.</p>
+                       {(labelFilters.tbc !== "all" || labelFilters.pspp !== "all" || labelFilters.gr !== "all") && (
+                         <button
+                           onClick={() => setLabelFilters({ tbc: "all", pspp: "all", gr: "all" })}
+                           className="mt-1 text-primary hover:underline text-[11px] font-semibold uppercase tracking-wider"
+                         >
+                           Clear all label filters
+                         </button>
+                       )}
+                    </div>
                   </td>
                 </tr>
               )}
@@ -767,6 +788,18 @@ const HazardTable = () => {
           onSubmit={handleSubmit}
         />
       )}
+
+      <InstrumentDrawer
+        open={instrumentPanelOpen}
+        onClose={() => setInstrumentPanelOpen(false)}
+        columns={COLUMNS}
+        visibleColumnIds={visibleColumnIds}
+        onVisibleColumnIdsChange={setVisibleColumnIds}
+        freezeColumns={freezeColumns}
+        onFreezeColumnsChange={setFreezeColumns}
+        rowHeight={rowHeight}
+        onRowHeightChange={setRowHeight}
+      />
     </div>
   );
 };
