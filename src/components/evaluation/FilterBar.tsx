@@ -45,18 +45,6 @@ interface FilterBarProps {
   totalCount: number;
 }
 
-const FILTER_ICONS: Record<string, React.ReactNode> = {
-  PIC: <Briefcase className="w-3.5 h-3.5 opacity-50" />,
-  Site: <MapPin className="w-3.5 h-3.5 opacity-50" />,
-  Lokasi: <Navigation className="w-3.5 h-3.5 opacity-50" />,
-  Detail: <MapPinned className="w-3.5 h-3.5 opacity-50" />,
-  Ketidaksesuaian: <Compass className="w-3.5 h-3.5 opacity-50" />,
-  Sub: <FolderTree className="w-3.5 h-3.5 opacity-50" />,
-  TBC: <Tag className="w-3.5 h-3.5 opacity-50" />,
-  PSPP: <Layers className="w-3.5 h-3.5 opacity-50" />,
-  GR: <Tag className="w-3.5 h-3.5 opacity-50" />,
-};
-
 const FilterBar = ({
   search,
   onSearchChange,
@@ -543,7 +531,6 @@ function MultiSelectFilter({ label, icon, options, selected, onChange, isInline 
                 "h-8 px-3 flex items-center gap-2 border bg-card transition-all rounded-[6px] group-hover:border-primary/50 group-data-[state=open]:border-primary hover:shadow-xs",
                 hasSelected && "border-primary/40 bg-primary/5 text-primary"
               )}>
-                {FILTER_ICONS[label as keyof typeof FILTER_ICONS] || <Filter className="w-3.5 h-3.5 opacity-50" />}
                 <span className="text-[11px] font-medium uppercase tracking-wider">{label}</span>
                 {hasSelected && (
                   <span className="ml-1 px-1.5 py-0.5 bg-primary text-white text-[9px] font-bold leading-none rounded-[2px]">
