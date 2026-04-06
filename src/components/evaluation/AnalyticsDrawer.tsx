@@ -30,20 +30,20 @@ type DatePreset = { label: string; from: Date; to: Date };
 
 // ─── Constants ──────────────────────────────────────────────
 const PIE_COLORS = [
-  "hsl(var(--primary))",    // Blue
-  "hsl(152, 45%, 42%)",      // Green
-  "hsl(38, 62%, 50%)",       // Orange
-  "hsl(0, 52%, 52%)",        // Red
-  "hsl(270, 38%, 54%)",      // Purple
+  "hsl(var(--primary))",     // Enterprise Green 
+  "hsl(161, 70%, 25%)",      // Deep Forest
+  "hsl(155, 60%, 45%)",      // Sea Green
+  "hsl(168, 80%, 35%)",      // Rich Emerald
+  "hsl(142, 45%, 52%)",      // Grass Green
+  "hsl(175, 60%, 40%)",      // Dark Teal
+  "hsl(185, 55%, 45%)",      // Ocean Green
+  "hsl(150, 40%, 65%)",      // Minty Sage
+  "hsl(165, 50%, 30%)",      // Charcoal Green
   "hsl(180, 42%, 44%)",      // Cyan
-  "hsl(330, 45%, 50%)",      // Pink
-  "hsl(22, 65%, 52%)",       // Deep Orange
-  "hsl(168, 65%, 40%)",      // Teal
-  "hsl(250, 45%, 55%)",      // Indigo
-  "hsl(315, 45%, 50%)",      // Fuchsia
-  "hsl(45, 65%, 45%)",       // Amber
-  "hsl(195, 65%, 45%)",      // Sky
-  "hsl(285, 45%, 45%)",      // Mulberry
+  "hsl(38, 62%, 50%)",       // Balanced Orange (Complementary)
+  "hsl(0, 52%, 52%)",        // Professional Red
+  "hsl(270, 38%, 54%)",      // Professional Purple
+  "hsl(220, 30%, 45%)",      // Muted Blue
 ];
 
 const OTHERS_COLOR = "hsl(var(--muted-foreground) / 0.3)";

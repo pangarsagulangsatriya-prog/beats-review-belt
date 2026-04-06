@@ -1,4 +1,4 @@
-import { Search, X, ChevronDown, MapPin, Navigation, Compass, Tag, Layers, FolderTree, Building2, MapPinned, BarChart3, Filter, Maximize2, Minimize2, Trash2, Lock, CheckSquare, RefreshCcw, Briefcase, Check } from "lucide-react";
+import { Search, X, ChevronDown, MapPin, Navigation, Compass, Tag, Layers, FolderTree, Building2, MapPinned, BarChart3, Filter, Trash2, Lock, CheckSquare, RefreshCcw, Briefcase, Check, ChevronsLeftRight, ChevronsRightLeft } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -114,7 +114,7 @@ const FilterBar = ({
             )}
             title="Expanded View"
           >
-            <Maximize2 className="w-3.5 h-3.5" />
+            <ChevronsLeftRight className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={() => setMode("compact")}
@@ -124,7 +124,7 @@ const FilterBar = ({
             )}
             title="Compact View"
           >
-            <Minimize2 className="w-3.5 h-3.5" />
+            <ChevronsRightLeft className="w-3.5 h-3.5" />
           </button>
         </div>
 
@@ -567,11 +567,11 @@ function MultiSelectFilter({ label, icon, options, selected, onChange, isInline 
           {hasSelected && (
             <div className="px-3 py-2 border-b border-border/60 flex items-center justify-between bg-muted/5">
               <span className="text-[11px] font-bold text-foreground uppercase tracking-tight">
-                {label} <span className="text-green-600 ml-0.5">{selected.length}</span>
+                {label} <span className="text-primary ml-0.5">{selected.length}</span>
               </span>
               <button 
                 onClick={(e) => { e.stopPropagation(); onChange([]); }} 
-                className="text-[10px] font-bold text-green-600 hover:text-green-700 transition-colors uppercase tracking-tight"
+                className="text-[10px] font-bold text-primary hover:opacity-80 transition-colors uppercase tracking-tight"
               >
                 Clear All
               </button>
@@ -582,11 +582,11 @@ function MultiSelectFilter({ label, icon, options, selected, onChange, isInline 
           {hasSelected && (
             <div className="px-3 py-2 border-b border-border/40 flex flex-wrap gap-1.5 bg-background">
               {selected.map(s => (
-                <div key={s} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-50 text-green-700 border border-green-100 rounded-full text-[10px] font-medium animate-in fade-in zoom-in-95 duration-200">
+                <div key={s} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-accent text-accent-foreground border border-primary/10 rounded-full text-[10px] font-medium animate-in fade-in zoom-in-95 duration-200">
                   {s}
                   <button 
                     onClick={(e) => { e.stopPropagation(); remove(s); }}
-                    className="hover:bg-green-200/50 rounded-full p-0.5 transition-colors"
+                    className="hover:bg-primary/10 rounded-full p-0.5 transition-colors"
                   >
                     <X className="w-2.5 h-2.5" />
                   </button>
@@ -627,7 +627,7 @@ function MultiSelectFilter({ label, icon, options, selected, onChange, isInline 
                 >
                   <div className={cn(
                     "w-4 h-4 rounded-[4px] border flex items-center justify-center transition-all bg-background shrink-0",
-                    isChecked ? "border-green-600 bg-green-600 shadow-sm" : "border-border/80 group-hover:border-primary/40",
+                    isChecked ? "border-primary bg-primary shadow-sm" : "border-border/80 group-hover:border-primary/40",
                   )}>
                     {isChecked && <Check className="w-3 h-3 text-white animate-in zoom-in duration-300 stroke-[3]" />}
                   </div>
