@@ -89,24 +89,25 @@ interface ColumnDef {
   label: string;
   sortable: boolean;
   isCritical?: boolean;
+  width?: string;
 }
 
 // Column definitions for sortable headers
 const COLUMNS: ColumnDef[] = [
-  { id: "id", key: null, label: "Task ID", sortable: false, isCritical: true },
-  { id: "timestamp", key: "timestamp" as SortKey, label: "Timestamp", sortable: true },
-  { id: "pic", key: null, label: "PIC Perusahaan", sortable: false },
-  { id: "site", key: "site" as SortKey, label: "Site", sortable: true },
-  { id: "lokasi", key: "lokasi" as SortKey, label: "Lokasi", sortable: true },
-  { id: "detail_location", key: null, label: "Detail Location", sortable: false },
-  { id: "ketidaksesuaian", key: null, label: "Ketidaksesuaian", sortable: false },
-  { id: "sub_ketidaksesuaian", key: null, label: "Sub Ketidaksesuaian", sortable: false },
-  { id: "description", key: null, label: "Description", sortable: false },
-  { id: "img", key: null, label: "Img", sortable: false },
-  { id: "tbc", key: "tbc_rel" as SortKey, label: "TBC", sortable: true },
-  { id: "pspp", key: "pspp_rel" as SortKey, label: "PSPP", sortable: true },
-  { id: "gr", key: "gr_rel" as SortKey, label: "GR", sortable: true },
-  { id: "action", key: "time_left" as SortKey, label: "Detail", sortable: false, isCritical: true },
+  { id: "id", key: null, label: "Task ID", sortable: false, isCritical: true, width: "w-[58px]" },
+  { id: "timestamp", key: "timestamp" as SortKey, label: "Timestamp", sortable: true, width: "w-[95px]" },
+  { id: "pic", key: null, label: "PIC Perusahaan", sortable: false, width: "w-[105px]" },
+  { id: "site", key: "site" as SortKey, label: "Site", sortable: true, width: "w-[45px]" },
+  { id: "lokasi", key: "lokasi" as SortKey, label: "Lokasi", sortable: true, width: "w-[65px]" },
+  { id: "detail_location", key: null, label: "Detail Location", sortable: false, width: "w-[95px]" },
+  { id: "ketidaksesuaian", key: null, label: "Ketidaksesuaian", sortable: false, width: "w-[115px]" },
+  { id: "sub_ketidaksesuaian", key: null, label: "Sub Ketidaksesuaian", sortable: false, width: "w-[115px]" },
+  { id: "description", key: null, label: "Description", sortable: false, width: "w-[190px]" },
+  { id: "img", key: null, label: "Img", sortable: false, width: "w-[42px]" },
+  { id: "tbc", key: "tbc_rel" as SortKey, label: "TBC", sortable: true, width: "w-[130px]" },
+  { id: "pspp", key: "pspp_rel" as SortKey, label: "PSPP", sortable: true, width: "w-[130px]" },
+  { id: "gr", key: "gr_rel" as SortKey, label: "GR", sortable: true, width: "w-[130px]" },
+  { id: "action", key: "time_left" as SortKey, label: "Detail", sortable: false, isCritical: true, width: "w-[32px]" },
 ];
 
 const PAGE_SIZE = 10;
@@ -450,9 +451,8 @@ const HazardTable = () => {
         </button>
       </div>
 
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-sm font-semibold text-foreground tracking-tight">Tabel Labeling</h2>
-        <span className="text-[10px] text-muted-foreground">{filtered.length} tasks</span>
+      <div className="flex items-center justify-between mb-3 min-h-[20px]">
+        <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider opacity-60">{filtered.length} tasks matching current filters</span>
       </div>
 
       <FilterBar
@@ -516,33 +516,32 @@ const HazardTable = () => {
         <div className="overflow-x-auto scrollbar-thin">
           <table className="w-full text-[11px] border-collapse" style={{ borderSpacing: 0 }}>
             <thead>
-              <tr className="bg-muted/50">
-                <th className="sticky left-0 z-30 text-center px-1 py-3 font-medium text-muted-foreground border-b border-r border-border w-[40px] min-w-[40px] bg-muted/60 text-[10px] uppercase shadow-[2px_0_4px_-1px_rgba(0,0,0,0.05)]">#</th>
+              <tr className="bg-muted/30 divide-x divide-border/30">
+                {/* Row index header - STICKY */}
+                <th className="sticky left-0 z-40 bg-muted/50 border-b border-border w-[40px] min-w-[40px] px-2 py-2 text-center text-[10px] uppercase font-bold text-muted-foreground tracking-widest shadow-[2px_0_4px_-1px_rgba(0,0,0,0.05)]">
+                  #
+                </th>
                 {COLUMNS.filter(c => visibleColumnIds.includes(c.id)).map((col, idx) => {
-                    const labelField = col.key === "tbc_rel" ? "tbc" as const : col.key === "pspp_rel" ? "pspp" as const : col.key === "gr_rel" ? "gr" as const : null;
                     const isFrozen = idx < freezeColumns;
-                    const leftOffset = idx === 0 ? "40px" : idx === 1 ? "170px" : "310px";
-                    const colWidth = idx === 0 ? "w-[130px] min-w-[130px]" : idx === 1 ? "w-[140px] min-w-[140px]" : "";
+                    const leftOffset = idx === 0 ? "40px" : idx === 1 ? "98px" : idx === 2 ? "193px" : "298px";
                     const isLastFrozen = idx === freezeColumns - 1;
+                    const labelField = (col.id === "tbc" || col.id === "pspp" || col.id === "gr") ? col.id as "tbc" | "pspp" | "gr" : null;
 
                     return (
                     <th
                       key={col.id}
-                      className={cn(
-                        "text-left px-3 py-3 font-semibold text-muted-foreground whitespace-nowrap border-b border-r border-border last:border-r-0 group transition-colors text-[10px] uppercase tracking-wider relative",
-                        isFrozen && "sticky z-20 bg-muted/60",
-                        isLastFrozen && "shadow-[4px_0_8px_-2px_rgba(0,0,0,0.08)]",
-                        colWidth,
-                        col.sortable && !labelField && "cursor-pointer select-none hover:bg-muted/90",
-                        activeColId === col.id && "bg-primary/[0.06]",
-                        hoverColId === col.id && "bg-muted/90",
-                        sort.key === col.key && sort.dir && "bg-primary/[0.04]",
-                        labelField && labelFilters[labelField] !== "all" && "bg-primary/[0.04]"
-                      )}
-                      style={isFrozen ? { left: leftOffset } : {}}
-                      onClick={() => col.sortable && !labelField && handleSort(col.key)}
                       onMouseEnter={() => setHoverColId(col.id)}
                       onMouseLeave={() => setHoverColId(null)}
+                      className={cn(
+                        "text-left text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-3 py-2 border-r border-border/80 last:border-r-0 bg-muted/20 select-none group shrink-0 transition-colors",
+                        col.width,
+                        isFrozen && "sticky z-30 bg-muted/40 backdrop-blur-sm",
+                        isLastFrozen && "shadow-[4px_0_8px_-2px_rgba(0,0,0,0.06)]",
+                        col.sortable && !labelField && "cursor-pointer hover:bg-muted/90",
+                        activeColId === col.id && "bg-primary/[0.06]"
+                      )}
+                      style={isFrozen ? { left: leftOffset } : undefined}
+                      onClick={() => col.sortable && !labelField && handleSort(col.key)}
                     >
                       {labelField ? (
                         <LabelColumnHeader
@@ -556,7 +555,7 @@ const HazardTable = () => {
                           }}
                         />
                       ) : (
-                        <div className={cn("truncate flex items-center gap-1", colWidth)}>
+                        <div className={cn("truncate flex items-center gap-1 w-full")}>
                           <span>{col.label}</span>
                           {col.sortable && renderSortIcon(col.key)}
                         </div>
@@ -576,7 +575,7 @@ const HazardTable = () => {
                 const expanded = isRowExpanded(h.id);
 
                 const cellClass = (colId: string) => cn(
-                  "px-3 py-2 border-r border-b border-border last:border-r-0",
+                  "px-2 py-1.5 border-r border-b border-border last:border-r-0",
                   expanded ? "whitespace-normal overflow-visible" : "whitespace-nowrap overflow-hidden",
                   activeColId === colId && !isActive && "bg-primary/[0.03]",
                   isActive && activeColId === colId && "ring-2 ring-inset ring-primary/40",
@@ -604,7 +603,8 @@ const HazardTable = () => {
                       !isActive && !isDimmed && "hover:bg-muted/40",
                       isActive && "bg-primary/[0.06] shadow-[inset_3px_0_0_hsl(var(--primary))]",
                       isBeingEdited && "bg-primary/[0.10] shadow-[inset_3px_0_0_hsl(var(--primary))] ring-1 ring-inset ring-primary/20",
-                      isDimmed && "opacity-30 blur-[0.3px] transition-all duration-300"
+                      isDimmed && "opacity-30 blur-[0.3px] transition-all duration-300",
+                      expanded && "bg-primary/[0.02]"
                     )}
                   >
                     {/* Row index - STICKY */}
@@ -616,12 +616,12 @@ const HazardTable = () => {
                     </td>
                     {COLUMNS.filter(c => visibleColumnIds.includes(c.id)).map((col, idx) => {
                       const isFrozen = idx < freezeColumns;
-                      const leftOffset = idx === 0 ? "40px" : idx === 1 ? "170px" : "310px";
-                      const colWidth = idx === 0 ? "w-[130px] min-w-[130px]" : idx === 1 ? "w-[140px] min-w-[140px]" : "";
+                      const leftOffset = idx === 0 ? "40px" : idx === 1 ? "98px" : idx === 2 ? "193px" : "298px";
                       const isLastFrozen = idx === freezeColumns - 1;
                       
                       const cellClasses = cn(
                         cellClass(col.id),
+                        col.width,
                         isFrozen && "sticky z-10 bg-card border-r border-border/40",
                         isLastFrozen && "shadow-[4px_0_8px_-2px_rgba(0,0,0,0.06)]",
                         isActive && isFrozen && "bg-primary/[0.04]",
@@ -638,17 +638,17 @@ const HazardTable = () => {
                           );
                           case "timestamp": return <span className="text-muted-foreground">{h.timestamp}</span>;
                           case "pic": return (
-                            <div className="flex flex-col leading-tight">
-                              <span className={cn("text-[11px] font-medium text-foreground", !expanded && "truncate max-w-[130px]")}>{h.pic_perusahaan}</span>
-                              <span className={cn("text-[10px] font-normal text-muted-foreground", !expanded && "truncate max-w-[130px]")}>{h.pic_name}</span>
+                            <div className="flex flex-col leading-tight overflow-hidden">
+                              <span className={cn("text-[11px] font-medium text-foreground truncate w-full", !expanded && "max-w-[100px]")}>{h.pic_perusahaan}</span>
+                              <span className={cn("text-[10px] font-normal text-muted-foreground truncate w-full", !expanded && "max-w-[100px]")}>{h.pic_name}</span>
                             </div>
                           );
                           case "site": return h.site;
                           case "lokasi": return h.lokasi;
                           case "detail_location": return expanded ? <span>{h.detail_location}</span> : <TruncatedCell text={h.detail_location} maxWidth="max-w-[120px]" />;
-                          case "ketidaksesuaian": return expanded ? <span>{h.ketidaksesuaian}</span> : <TruncatedCell text={h.ketidaksesuaian} />;
-                          case "sub_ketidaksesuaian": return expanded ? <span>{h.sub_ketidaksesuaian}</span> : <TruncatedCell text={h.sub_ketidaksesuaian} />;
-                          case "description": return expanded ? <span>{h.description}</span> : <TruncatedCell text={h.description} maxWidth="max-w-[150px]" />;
+                          case "ketidaksesuaian": return expanded ? <div className="leading-tight break-words">{h.ketidaksesuaian}</div> : <TruncatedCell text={h.ketidaksesuaian} maxWidth={col.width} />;
+                          case "sub_ketidaksesuaian": return expanded ? <div className="leading-tight break-words">{h.sub_ketidaksesuaian}</div> : <TruncatedCell text={h.sub_ketidaksesuaian} maxWidth={col.width} />;
+                          case "description": return expanded ? <div className="leading-tight break-words whitespace-normal py-1 pr-6">{h.description}</div> : <TruncatedCell text={h.description} maxWidth={col.width} />;
                           case "img": return <ImageCell src={h.image_url} />;
                           case "tbc": case "pspp": case "gr": {
                             const field = col.id as "tbc" | "pspp" | "gr";
@@ -678,10 +678,10 @@ const HazardTable = () => {
                             <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
                               <button
                                 onClick={() => openDrawer(h)}
-                                className="p-1 px-2 rounded-md border border-border bg-card text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-all shadow-sm flex items-center gap-1"
+                                className="p-0.5 rounded-md border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted transition-all shadow-sm flex items-center justify-center shrink-0"
+                                title="View Details"
                               >
                                 <Eye className="w-3.5 h-3.5" />
-                                <span>View</span>
                               </button>
                               <button className="p-1 px-2 rounded-md border border-primary/20 bg-primary/5 text-[10px] font-medium text-primary hover:bg-primary/10 transition-all shadow-sm flex items-center gap-1">
                                 <Brain className="w-3.5 h-3.5" />
@@ -705,7 +705,7 @@ const HazardTable = () => {
                             setActiveColId(col.id);
                           }}
                         >
-                          <div className={cn("truncate", colWidth)}>
+                          <div className={cn("truncate", col.width)}>
                             {renderCellContent()}
                           </div>
                         </td>

@@ -344,7 +344,7 @@ function AnalyticsDateFilter({
 }: { 
   dateRange: DateRange; 
   onChange: (r: DateRange) => void;
-  mode: "daily" | "weekly" | "monthly";
+  mode: "daily" | "weekly";
 }) {
   const [open, setOpen] = useState(false);
   const presets = getAnalyticsDatePresets();
@@ -392,26 +392,17 @@ function AnalyticsDateFilter({
   }, [tempMonth]);
 
   const handleMonthChoice = (m: Date) => {
-    if (mode === "monthly") {
-      onChange({ from: startOfMonth(m), to: endOfMonth(m) });
-      setOpen(false);
-    } else {
-      setTempMonth(m);
-      setSelectionStep("week");
-    }
+    setTempMonth(m);
+    setSelectionStep("week");
   };
 
   const handleWeekChoice = (w: { from: Date; to: Date }) => {
     onChange({ from: w.from, to: w.to });
     setOpen(false);
   };
-
   const displayLabel = useMemo(() => {
     if (mode === "daily") {
       return activePreset ? activePreset.label : formatDateCompact(dateRange);
-    }
-    if (mode === "monthly") {
-      return format(dateRange.from, "MMMM yyyy", { locale: localeId });
     }
     return `Week ${Math.ceil((dateRange.from.getDate()) / 7)} — ${format(dateRange.from, "MMM yyyy")}`;
   }, [mode, dateRange, activePreset]);
@@ -461,26 +452,7 @@ function AnalyticsDateFilter({
             </div>
           )}
 
-          {mode === "monthly" && (
-            <div className="space-y-0.5">
-               <div className="px-4 py-2 mb-1 border-b border-border/50 bg-muted/10">
-                <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Select Month</span>
-              </div>
-              {monthsList.map(m => (
-                <button
-                  key={m.toISOString()}
-                  onClick={() => handleMonthChoice(m)}
-                  className={cn(
-                    "flex items-center justify-between w-full px-5 py-2.5 text-left hover:bg-muted transition-colors",
-                    isSameDay(startOfMonth(m), startOfMonth(dateRange.from)) && "bg-primary/5 text-primary"
-                  )}
-                >
-                  <span className="text-[11px] font-bold">{format(m, "MMMM yyyy", { locale: localeId })}</span>
-                  {isSameDay(startOfMonth(m), startOfMonth(dateRange.from)) && <Check className="w-3.5 h-3.5" />}
-                </button>
-              ))}
-            </div>
-          )}
+          {/* Monthly mode removed */}
 
           {mode === "weekly" && (
             <div className="space-y-0.5">
@@ -891,7 +863,7 @@ const LabelAnalyticsSection = ({
 // ─── Daily Recap Components ─────────────────────────────────
 
 /** View Switcher — Segmented Control */
-const ViewSwitcher = ({ view, onChange }: { view: "daily" | "weekly" | "monthly"; onChange: (v: "daily" | "weekly" | "monthly") => void }) => (
+const ViewSwitcher = ({ view, onChange }: { view: "daily" | "weekly"; onChange: (v: "daily" | "weekly") => void }) => (
   <div className="flex p-1 bg-muted/30 rounded-xl border border-border w-fit shrink-0 backdrop-blur-sm shadow-inner">
     <button
       onClick={() => onChange("daily")}
@@ -912,16 +884,6 @@ const ViewSwitcher = ({ view, onChange }: { view: "daily" | "weekly" | "monthly"
     >
       <CalendarIcon className="w-3.5 h-3.5" />
       Weekly
-    </button>
-    <button
-      onClick={() => onChange("monthly")}
-      className={cn(
-        "flex items-center gap-2 px-5 py-1.5 rounded-lg text-[11px] font-bold tracking-tight transition-all",
-        view === "monthly" ? "bg-card text-primary shadow-sm ring-1 ring-border/50" : "text-muted-foreground hover:text-foreground"
-      )}
-    >
-      <TrendingUp className="w-3.5 h-3.5" />
-      Monthly
     </button>
   </div>
 );
@@ -1606,179 +1568,13 @@ const WeeklyView = ({ recaps }: { recaps: DailyRecap[] }) => {
   );
 };
 
-const MonthlyView = ({ recaps }: { recaps: DailyRecap[] }) => {
-  // Group recaps by month
-  const monthlyRollups = useMemo(() => {
-    const groups: Record<string, DailyRecap[]> = {};
-    recaps.forEach(r => {
-      const monthKey = format(new Date(r.date), "yyyy-MM");
-      if (!groups[monthKey]) groups[monthKey] = [];
-      groups[monthKey].push(r);
-    });
 
-    return Object.entries(groups).map(([monthKey, monthRecaps]) => {
-      const total = monthRecaps.reduce((s, r) => s + r.total, 0);
-      const human = monthRecaps.reduce((s, r) => s + r.humanAnnotated, 0);
-      const ai = monthRecaps.reduce((s, r) => s + r.finalByAI, 0);
-
-      // Aggregate distributions (simple average for mock)
-      const aggregateLabels = (key: "tbc" | "gr" | "pspp") => {
-        const labelMap: Record<string, number> = {};
-        monthRecaps.forEach(r => {
-          r[key].forEach(l => {
-            labelMap[l.name] = (labelMap[l.name] || 0) + l.percentage;
-          });
-        });
-        return Object.entries(labelMap).map(([name, sum]) => ({
-          name,
-          percentage: Math.round(sum / monthRecaps.length)
-        })).sort((a, b) => b.percentage - a.percentage);
-      };
-
-      return {
-        monthKey,
-        monthName: format(new Date(monthKey + "-01"), "MMMM yyyy", { locale: localeId }),
-        total,
-        humanAnnotated: human,
-        finalByAI: ai,
-        tbc: aggregateLabels("tbc"),
-        gr: aggregateLabels("gr"),
-        pspp: aggregateLabels("pspp"),
-        recaps: monthRecaps
-      };
-    }).sort((a, b) => b.monthKey.localeCompare(a.monthKey));
-  }, [recaps]);
-
-  const [activeIndex, setActiveIndex] = useState(0);
-  const currentMonth = monthlyRollups[activeIndex];
-
-  if (!currentMonth) return null;
-
-  // Standard rollup data structure
-  const monthlyAggregate = useMemo(() => {
-    const totalPos = currentMonth.total;
-    const totalHuman = currentMonth.humanAnnotated;
-    const totalAI = currentMonth.finalByAI;
-    
-    // Aggregation logic for categories
-    const aggregateField = (key: "tbc" | "gr" | "pspp") => {
-      const dist = currentMonth[key];
-      const tableData = dist.map(l => ({
-        name: l.name,
-        value: Math.round(totalPos * (l.percentage / 100)),
-        pct: l.percentage
-      })).sort((a,b) => b.pct - a.pct);
-
-      return {
-        pieData: tableData.slice(0, 7).map(d => ({ name: d.name, value: d.pct })),
-        tableData,
-        finalCount: Math.round(totalHuman * 0.7),
-        waitingCount: Math.round(totalAI * 0.3),
-        total: Math.round(totalPos * 0.8) // Category specific estimate
-      };
-    };
-
-    return {
-      tbc: aggregateField("tbc"),
-      gr: aggregateField("gr"),
-      pspp: aggregateField("pspp"),
-      total: totalPos,
-      human: totalHuman,
-      ai: totalAI
-    };
-  }, [currentMonth]);
-
-  return (
-    <div className="space-y-10 animate-in fade-in duration-700">
-      {/* Month Selector Area */}
-      <div className="flex items-center justify-between pb-2">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 shadow-inner">
-            <TrendingUp className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <h3 className="text-lg font-black text-foreground tracking-tight uppercase leading-none">
-              {currentMonth.monthName}
-            </h3>
-            <p className="text-[10px] text-muted-foreground mt-1.5 font-bold uppercase tracking-widest flex items-center gap-2">
-              <span className="w-1 h-1 rounded-full bg-primary" />
-              Monthly Analysis Report
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 p-1 bg-muted/30 rounded-xl border border-border shadow-inner">
-           <button 
-             onClick={() => setActiveIndex(prev => Math.min(prev + 1, monthlyRollups.length - 1))}
-             disabled={activeIndex === monthlyRollups.length - 1}
-             className="p-2.5 rounded-lg hover:bg-card hover:shadow-xs transition-all disabled:opacity-30"
-           >
-             <ChevronLeft className="w-4 h-4" />
-           </button>
-           <div className="h-4 w-px bg-border/50 mx-1" />
-           <button 
-             onClick={() => setActiveIndex(prev => Math.max(prev - 1, 0))}
-             disabled={activeIndex === 0}
-             className="p-2.5 rounded-lg hover:bg-card hover:shadow-xs transition-all disabled:opacity-30"
-           >
-             <ChevronRight className="w-4 h-4" />
-           </button>
-        </div>
-      </div>
-
-      {/* Standard KPI Area */}
-      <div className="grid grid-cols-4 gap-4">
-        <Scorecard label="Monthly Snapshots" value={monthlyAggregate.total} waiting={monthlyAggregate.ai} finalVal={monthlyAggregate.human} tip="Total hazard yang terekam dalam snapshot sebulan ini." />
-        <Scorecard label="Avg TBC" value={monthlyAggregate.tbc.total} waiting={monthlyAggregate.tbc.waitingCount} finalVal={monthlyAggregate.tbc.finalCount} tip="Rata-rata akumulasi TBC per bulan." />
-        <Scorecard label="Avg GR" value={monthlyAggregate.gr.total} waiting={monthlyAggregate.gr.waitingCount} finalVal={monthlyAggregate.gr.finalCount} tip="Rata-rata akumulasi GR per bulan." />
-        <Scorecard label="Avg PSPP" value={monthlyAggregate.pspp.total} waiting={monthlyAggregate.pspp.waitingCount} finalVal={monthlyAggregate.pspp.finalCount} tip="Rata-rata akumulasi PSPP per bulan." />
-      </div>
-
-      {/* Detailed Aggregate Analysis */}
-      <div className="space-y-8">
-        <div className="flex items-center justify-between">
-           <h4 className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-60">Full Month Intelligence Distribution</h4>
-           <span className="text-[9px] font-black text-primary bg-primary/10 px-3 py-1 rounded-full border border-primary/20 uppercase tracking-widest">Monthly Report</span>
-        </div>
-        <div className="space-y-8">
-           <LabelAnalyticsSection title="Monthly TBC Analytics" field="tbc" customData={monthlyAggregate.tbc} />
-           <LabelAnalyticsSection title="Monthly GR Analytics" field="gr" customData={monthlyAggregate.gr} />
-           <LabelAnalyticsSection title="Monthly PSPP Analytics" field="pspp" customData={monthlyAggregate.pspp} />
-        </div>
-      </div>
-
-      {/* Snapshot Heatmap/Intensity */}
-      <div className="bg-muted/30 rounded-3xl border border-border/80 p-8 shadow-inner overflow-hidden relative group">
-         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-2xl" />
-         <div className="flex items-center justify-between mb-8 relative z-10">
-           <div className="flex flex-col gap-1">
-             <h4 className="text-[12px] font-black text-foreground uppercase tracking-wider">Snapshot Activity History</h4>
-             <span className="text-[10px] font-bold text-muted-foreground opacity-60">Daily processing and finalization trends</span>
-           </div>
-           <span className="text-[10px] font-black text-primary bg-primary/5 px-3 py-1 rounded-full">{currentMonth.recaps.length} Days Recorded</span>
-         </div>
-         <div className="flex h-4 items-center gap-1.5 w-full bg-background/50 p-1 rounded-full border border-border/40">
-           {currentMonth.recaps.map(r => (
-             <div key={r.date} className="h-full flex-1 rounded-full bg-primary/10 overflow-hidden hover:bg-primary/20 transition-colors group/bar cursor-help">
-               <div className="h-full bg-primary/80 group-hover/bar:bg-primary transition-all duration-500" style={{ width: `${(r.humanAnnotated / r.total) * 100}%` }} />
-             </div>
-           ))}
-         </div>
-         <div className="mt-4 flex items-center justify-between text-[8px] font-black text-muted-foreground uppercase tracking-widest opacity-40">
-           <span>Start of Month</span>
-           <span>Review Velocity Trends</span>
-           <span>End of Month</span>
-         </div>
-      </div>
-    </div>
-  );
-};
 
 // ─── Main Component ─────────────────────────────────────────
 const AnalyticsDrawer = ({ open, onClose, allData, filteredData, dateRange, filters, onApplyToPage }: AnalyticsDrawerProps) => {
   const [drawerDate, setDrawerDate] = useState<DateRange>(dateRange);
   const [drawerFilters, setDrawerFilters] = useState<ColumnFilters>(emptyFilters);
-  const [viewMode, setViewMode] = useState<"daily" | "weekly" | "monthly">("daily");
+  const [viewMode, setViewMode] = useState<"daily" | "weekly">("daily");
 
   useEffect(() => {
     if (open) {
@@ -1958,7 +1754,6 @@ const AnalyticsDrawer = ({ open, onClose, allData, filteredData, dateRange, filt
           <div className="animate-in fade-in duration-500">
              {viewMode === "daily" && overviewContent}
              {viewMode === "weekly" && <WeeklyView recaps={mockDailyRecaps} />}
-             {viewMode === "monthly" && <MonthlyView recaps={mockDailyRecaps} />}
           </div>
         </div>
       </div>
