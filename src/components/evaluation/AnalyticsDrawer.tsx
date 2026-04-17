@@ -634,25 +634,6 @@ const LabelAnalyticsSection = ({
 
       {activeTab === "overview" ? (
         <div className="p-6">
-           {progress !== undefined && (
-             <div className="mb-6 flex items-center justify-between px-4 py-2 bg-muted/10 rounded-xl border border-border/30">
-                <div className="flex items-center gap-3">
-                   <div className="flex items-center gap-1.5 px-1.5 py-0.5 bg-background border border-border shadow-xs rounded-md">
-                      <span className="text-[10px] font-black text-primary italic">{Math.round(progress * 7)}/7</span>
-                      <span className="text-[7px] font-black text-muted-foreground uppercase opacity-40">Days</span>
-                   </div>
-                   <div className="h-1 w-32 bg-background rounded-full overflow-hidden border border-border/20">
-                      <div className="h-full bg-primary" style={{ width: `${progress * 100}%` }} />
-                   </div>
-                </div>
-                <div className="flex items-center gap-2">
-                   {progress < 1 && <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />}
-                   <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest opacity-50">
-                      {progress === 1 ? "Standardized Cycle" : "Dynamic Collection In-Progress"}
-                   </span>
-                </div>
-             </div>
-           )}
            {finalCount === 0 && tableData.length === 0 ? (
             <div className="px-6 py-10 text-center">
               <p className="text-[11px] text-muted-foreground font-medium italic">Tidak ada label distribusi yang ditemukan.</p>
@@ -1469,6 +1450,25 @@ const WeeklyView = ({ recaps }: { recaps: DailyRecap[] }) => {
       </div>
 
       {/* ── 4. Behavioral Trend Analytics ── */}
+           {/* Global Progress Indicator */}
+           <div className="mb-10 flex items-center justify-between px-6 py-4 bg-muted/20 rounded-2xl border border-border/40 backdrop-blur-sm">
+              <div className="flex items-center gap-4">
+                 <div className="flex items-center gap-2 px-3 py-1.5 bg-background border border-border shadow-xs rounded-xl">
+                    <span className="text-sm font-black text-primary italic">{currentWeek.length}/7</span>
+                    <span className="text-[9px] font-black text-muted-foreground uppercase opacity-40 tracking-widest">Collection Days</span>
+                 </div>
+                 <div className="h-2 w-48 bg-background rounded-full overflow-hidden border border-border/20">
+                    <div className="h-full bg-primary transition-all duration-1000" style={{ width: `${(currentWeek.length / 7) * 100}%` }} />
+                 </div>
+              </div>
+              <div className="flex items-center gap-3">
+                 {currentWeek.length < 7 && <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.5)]" />}
+                 <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-50">
+                    {currentWeek.length === 7 ? "Cycle Perfection Achieved" : "Active Behavioral Analysis Window"}
+                 </span>
+              </div>
+           </div>
+
       <div className="space-y-12">
          <div className="flex items-center justify-between px-2 pt-4">
              <h4 className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.25em] opacity-65 flex items-center gap-3">
@@ -1479,10 +1479,29 @@ const WeeklyView = ({ recaps }: { recaps: DailyRecap[] }) => {
              </span>
           </div>
 
+           {/* Global Progress Indicator */}
+           <div className="mb-10 flex items-center justify-between px-6 py-4 bg-muted/20 rounded-2xl border border-border/40 backdrop-blur-sm">
+              <div className="flex items-center gap-4">
+                 <div className="flex items-center gap-2 px-3 py-1.5 bg-background border border-border shadow-xs rounded-xl">
+                    <span className="text-sm font-black text-primary italic">{currentWeek.length}/7</span>
+                    <span className="text-[9px] font-black text-muted-foreground uppercase opacity-40 tracking-widest">Collection Days</span>
+                 </div>
+                 <div className="h-2 w-48 bg-background rounded-full overflow-hidden border border-border/20">
+                    <div className="h-full bg-primary transition-all duration-1000" style={{ width: `${(currentWeek.length / 7) * 100}%` }} />
+                 </div>
+              </div>
+              <div className="flex items-center gap-3">
+                 {currentWeek.length < 7 && <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.5)]" />}
+                 <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-50">
+                    {currentWeek.length === 7 ? "Cycle Perfection Achieved" : "Active Behavioral Analysis Window"}
+                 </span>
+              </div>
+           </div>
+
           <div className="space-y-12">
-             <LabelAnalyticsSection title="TBC Status" field="tbc" customData={weekAggregate.tbc} trendData={weekAggregate.tbc.trendPoints} progress={currentWeek.length / 7} />
-             <LabelAnalyticsSection title="GR Status" field="gr" customData={weekAggregate.gr} trendData={weekAggregate.gr.trendPoints} progress={currentWeek.length / 7} />
-             <LabelAnalyticsSection title="PSPP Status" field="pspp" customData={weekAggregate.pspp} trendData={weekAggregate.pspp.trendPoints} progress={currentWeek.length / 7} />
+             <LabelAnalyticsSection title="TBC Status" field="tbc" customData={weekAggregate.tbc} trendData={weekAggregate.tbc.trendPoints} />
+             <LabelAnalyticsSection title="GR Status" field="gr" customData={weekAggregate.gr} trendData={weekAggregate.gr.trendPoints} />
+             <LabelAnalyticsSection title="PSPP Status" field="pspp" customData={weekAggregate.pspp} trendData={weekAggregate.pspp.trendPoints} />
           </div>
       </div>
 
