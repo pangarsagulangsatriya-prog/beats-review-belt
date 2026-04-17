@@ -1472,8 +1472,9 @@ const WeeklyView = ({ recaps }: { recaps: DailyRecap[] }) => {
       </div>
 
       {/* ── 4. Behavioral Trend Analytics ── */}
+      <div className="space-y-8 mt-12">
            {/* Global Progress Indicator */}
-           <div className="mb-10 flex items-center justify-between px-6 py-4 bg-muted/20 rounded-2xl border border-border/40 backdrop-blur-sm">
+           <div className="flex items-center justify-between px-6 py-4 bg-muted/20 rounded-2xl border border-border/40 backdrop-blur-sm">
               <div className="flex items-center gap-4">
                  <div className="flex items-center gap-2 px-3 py-1.5 bg-background border border-border shadow-xs rounded-xl">
                     <span className="text-sm font-black text-primary italic">{currentWeek.length}/7</span>
@@ -1491,33 +1492,13 @@ const WeeklyView = ({ recaps }: { recaps: DailyRecap[] }) => {
               </div>
            </div>
 
-      <div className="space-y-12">
-         <div className="flex items-center justify-between px-2 pt-4">
-             <h4 className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.25em] opacity-65 flex items-center gap-3">
-               <span className="w-8 h-[1px] bg-border" /> Distribution Dynamics (Full Week)
-             </h4>
-             <span className="text-[9px] font-black text-primary bg-primary/10 px-4 py-1.5 rounded-full border border-primary/25 border-dashed uppercase tracking-widest animate-pulse shadow-[0_0_15px_rgba(37,99,235,0.1)]">
-               Active Aggregate Window
-             </span>
-          </div>
-
-           {/* Global Progress Indicator */}
-           <div className="mb-10 flex items-center justify-between px-6 py-4 bg-muted/20 rounded-2xl border border-border/40 backdrop-blur-sm">
-              <div className="flex items-center gap-4">
-                 <div className="flex items-center gap-2 px-3 py-1.5 bg-background border border-border shadow-xs rounded-xl">
-                    <span className="text-sm font-black text-primary italic">{currentWeek.length}/7</span>
-                    <span className="text-[9px] font-black text-muted-foreground uppercase opacity-40 tracking-widest">Collection Days</span>
-                 </div>
-                 <div className="h-2 w-48 bg-background rounded-full overflow-hidden border border-border/20">
-                    <div className="h-full bg-primary transition-all duration-1000" style={{ width: `${(currentWeek.length / 7) * 100}%` }} />
-                 </div>
-              </div>
-              <div className="flex items-center gap-3">
-                 {currentWeek.length < 7 && <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.5)]" />}
-                 <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-50">
-                    {currentWeek.length === 7 ? "Cycle Perfection Achieved" : "Active Behavioral Analysis Window"}
-                 </span>
-              </div>
+           <div className="flex items-center justify-between px-2 pt-6">
+              <h4 className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.25em] opacity-65 flex items-center gap-3">
+                <span className="w-8 h-[1px] bg-border" /> Distribution Dynamics (Full Week)
+              </h4>
+              <span className="text-[9px] font-black text-primary bg-primary/10 px-4 py-1.5 rounded-full border border-primary/25 border-dashed uppercase tracking-widest animate-pulse shadow-[0_0_15px_rgba(37,99,235,0.1)]">
+                Active Aggregate Window
+              </span>
            </div>
 
           <div className="space-y-12">
