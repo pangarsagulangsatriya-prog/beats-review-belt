@@ -8,10 +8,10 @@ const Navbar = () => {
       <div className="flex items-center gap-2.5">
         <div>
           <h1 className="text-[13px] font-semibold text-foreground leading-tight tracking-tight">
-            Safety Intelligence
+            Safety Status Center
             <span className="ml-2 text-[10px] font-normal text-muted-foreground tracking-normal">v2.0</span>
           </h1>
-          <p className="text-[10px] text-muted-foreground leading-tight">AI-Powered Safety Analysis & Evaluation</p>
+          <p className="text-[10px] text-muted-foreground leading-tight">AI-Powered Safety Review & Analysis</p>
         </div>
       </div>
       <div className="flex items-center gap-2">

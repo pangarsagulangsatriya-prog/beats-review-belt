@@ -11,7 +11,7 @@ const Sidebar = () => {
   return (
     <aside className="flex flex-col items-center w-[56px] bg-card py-3 gap-0.5 border-r border-border shrink-0">
       <div className="w-8 h-8 rounded-lg overflow-hidden mb-6 ring-1 ring-border/50">
-        <img src="/logo.png" alt="Safety Intelligence" className="w-full h-full object-cover" />
+        <img src="/logo.png" alt="Safety Review" className="w-full h-full object-cover" />
       </div>
       {navItems.map((item) => (
         <button

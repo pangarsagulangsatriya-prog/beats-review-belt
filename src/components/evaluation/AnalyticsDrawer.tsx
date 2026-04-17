@@ -591,7 +591,7 @@ const LabelAnalyticsSection = ({
             <div className="w-2.5 h-2.5 rounded-full bg-primary shadow-sm" />
             <div className="flex flex-col">
               <h3 className="text-[12px] font-black text-foreground tracking-tight uppercase leading-none">{title}</h3>
-              <span className="text-[9px] text-muted-foreground mt-1 font-bold">Standard Intelligence Breakdown</span>
+              <span className="text-[9px] text-muted-foreground mt-1 font-bold">Standard {field.toUpperCase()} Breakdown</span>
             </div>
           </div>
 
@@ -789,7 +789,7 @@ const LabelAnalyticsSection = ({
               </div>
             </div>
           )}
-        </>
+        </div>
       ) : (
         <div className="bg-card flex flex-col p-8 space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300 h-[520px]">
            {/* Enterprise Legend (Mixpanel Style) */}
@@ -843,7 +843,7 @@ const LabelAnalyticsSection = ({
                             <div className="bg-background/95 backdrop-blur-md border border-border p-4 rounded-2xl shadow-3xl space-y-3 min-w-[220px]">
                                <div className="flex items-center justify-between pb-2 border-b border-border/60">
                                   <p className="text-[10px] font-black text-foreground uppercase tracking-[0.1em]">{label}</p>
-                                  <span className="text-[8px] font-black text-muted-foreground uppercase opacity-40">Intelligence Snap</span>
+                                  <span className="text-[8px] font-black text-muted-foreground uppercase opacity-40">{fieldLabel} Snapshot</span>
                                </div>
                                <div className="space-y-2">
                                   {sortedPayload.map((p: any, idx: number) => (
@@ -1213,9 +1213,10 @@ const WeeklyView = ({ recaps }: { recaps: DailyRecap[] }) => {
                 Trend
               </button>
            </div>
+        </div>
+      </div>
 
-
-      {/* ── 2. Integrated Intelligence Matrix vs Trend Visualization ── */}
+      {/* ── 2. Integrated Behavior Matrix vs Trend Visualization ── */}
       {viewMode === 'matrix' ? (
         <div className="bg-card rounded-xl border border-border/80 shadow-sm relative overflow-hidden group/matrix transition-all duration-700 isolate">
           <div className="grid grid-cols-7 h-full">
@@ -1617,7 +1618,7 @@ const AnalyticsDrawer = ({ open, onClose, allData, filteredData, dateRange, filt
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-3 pr-3 border-r border-border/60">
                 <div className="flex flex-col items-end">
-                   <span className="text-[9px] font-black text-foreground uppercase tracking-tighter leading-none">Intelligence Hub</span>
+                   <span className="text-[9px] font-black text-foreground uppercase tracking-tighter leading-none">Review Hub</span>
                    <span className="text-[8px] text-muted-foreground mt-1 font-bold uppercase tracking-widest opacity-60">Status: Operational</span>
                 </div>
                 <div className={cn(
