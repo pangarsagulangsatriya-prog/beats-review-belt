@@ -1687,7 +1687,6 @@ const AnalyticsDrawer = ({ open, onClose, allData, filteredData, dateRange, filt
               <AnalyticsMultiSelect label="Site" options={filterOptions.sites} selected={drawerFilters.site} onChange={(v) => setDrawerFilters(prev => ({ ...prev, site: v }))} />
               <AnalyticsMultiSelect label="Lokasi" options={filterOptions.lokasi} selected={drawerFilters.lokasi} onChange={(v) => setDrawerFilters(prev => ({ ...prev, lokasi: v }))} />
               <AnalyticsMultiSelect label="Detail Lokasi" options={filterOptions.detail_location} selected={drawerFilters.detail_location} onChange={(v) => setDrawerFilters(prev => ({ ...prev, detail_location: v }))} />
-              <AnalyticsMultiSelect label="Ketidaksesuaian" options={filterOptions.ketidaksesuaian} selected={drawerFilters.ketidaksesuaian} onChange={(v) => setDrawerFilters(prev => ({ ...prev, ketidaksesuaian: v }))} />
             </div>
 
             <div className="flex-1" />
@@ -1714,14 +1713,6 @@ const AnalyticsDrawer = ({ open, onClose, allData, filteredData, dateRange, filt
             </button>
           </div>
 
-          {isFilterDifferent && (
-            <div className="mt-2.5 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-accent/50 border border-accent">
-              <span className="w-1.5 h-1.5 rounded-full bg-status-progress animate-pulse" />
-              <p className="text-[10px] text-accent-foreground font-medium">
-                Filter analytics berbeda dari halaman utama — klik "Apply to Page" untuk menerapkan.
-              </p>
-            </div>
-          )}
         </div>
 
         <div className="flex-1 overflow-y-auto px-7 py-8 scrollbar-thin bg-card">
