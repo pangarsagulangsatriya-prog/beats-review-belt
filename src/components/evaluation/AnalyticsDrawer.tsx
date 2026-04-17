@@ -985,8 +985,8 @@ const DailyRecapDetail = ({ recap }: { recap: DailyRecap }) => {
           customData={{
             pieData: recap.tbc.slice(0, 7).map(l => ({ name: l.name, value: l.percentage })),
             tableData: recap.tbc.map(l => ({ name: l.name, value: Math.round(recap.total * (l.percentage/100)), pct: l.percentage })),
-            finalCount: Math.round(recap.total * 0.72),
-            waitingCount: recap.total - Math.round(recap.total * 0.72),
+            finalCount: recap.total,
+            waitingCount: 0,
             total: recap.total
           }} 
         />
@@ -996,8 +996,8 @@ const DailyRecapDetail = ({ recap }: { recap: DailyRecap }) => {
           customData={{
             pieData: recap.gr.slice(0, 7).map(l => ({ name: l.name, value: l.percentage })),
             tableData: recap.gr.map(l => ({ name: l.name, value: Math.round(recap.total * (l.percentage/100)), pct: l.percentage })),
-            finalCount: Math.round(recap.total * 0.68),
-            waitingCount: recap.total - Math.round(recap.total * 0.68),
+            finalCount: recap.total,
+            waitingCount: 0,
             total: recap.total
           }} 
         />
@@ -1007,8 +1007,8 @@ const DailyRecapDetail = ({ recap }: { recap: DailyRecap }) => {
           customData={{
             pieData: recap.pspp.slice(0, 7).map(l => ({ name: l.name, value: l.percentage })),
             tableData: recap.pspp.map(l => ({ name: l.name, value: Math.round(recap.total * (l.percentage/100)), pct: l.percentage })),
-            finalCount: Math.round(recap.total * 0.75),
-            waitingCount: recap.total - Math.round(recap.total * 0.75),
+            finalCount: recap.total,
+            waitingCount: 0,
             total: recap.total
           }} 
         />
@@ -1116,8 +1116,8 @@ const WeeklyView = ({ recaps }: { recaps: DailyRecap[] }) => {
         pieData: tableData.slice(0, 7).map(d => ({ name: d.name, value: d.pct })),
         tableData,
         trendPoints,
-        finalCount: Math.round(totalHuman * 0.6), 
-        waitingCount: Math.round(totalAI * 0.4),
+        finalCount: totalPos, 
+        waitingCount: 0,
         total: totalPos
       };
     };
@@ -1491,10 +1491,10 @@ const WeeklyView = ({ recaps }: { recaps: DailyRecap[] }) => {
 
       {/* ── 3. High-Level Summary Scorecards ── */}
       <div className="grid grid-cols-4 gap-4">
-        <Scorecard label="Total Weekly Ops" value={weekAggregate.total} waiting={weekAggregate.ai} finalVal={weekAggregate.human} tip="Total hazards for the 7-day window." />
-        <Scorecard label="TBC Verified" value={weekAggregate.tbc.total} waiting={weekAggregate.tbc.waitingCount} finalVal={weekAggregate.tbc.finalCount} tip="Aggregate verified TBC infractions." />
-        <Scorecard label="GR Verified" value={weekAggregate.gr.total} waiting={weekAggregate.gr.waitingCount} finalVal={weekAggregate.gr.finalCount} tip="Aggregate verified GR infractions." />
-        <Scorecard label="PSPP Verified" value={weekAggregate.pspp.total} waiting={weekAggregate.pspp.waitingCount} finalVal={weekAggregate.pspp.finalCount} tip="Aggregate verified PSPP infractions." />
+        <Scorecard label="Total Weekly Ops" value={weekAggregate.total} waiting={0} finalVal={weekAggregate.total} tip="Total hazards for the 7-day window." />
+        <Scorecard label="TBC Verified" value={weekAggregate.tbc.total} waiting={0} finalVal={weekAggregate.tbc.total} tip="Aggregate verified TBC infractions." />
+        <Scorecard label="GR Verified" value={weekAggregate.gr.total} waiting={0} finalVal={weekAggregate.gr.total} tip="Aggregate verified GR infractions." />
+        <Scorecard label="PSPP Verified" value={weekAggregate.pspp.total} waiting={0} finalVal={weekAggregate.pspp.total} tip="Aggregate verified PSPP infractions." />
       </div>
 
       {/* ── 4. Behavioral Trend Analytics ── */}
