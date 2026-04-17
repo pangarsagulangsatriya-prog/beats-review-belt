@@ -238,16 +238,10 @@ const Scorecard = ({ label, value, waiting, finalVal, tip, accent }: {
       <span className="text-[11px] font-medium text-muted-foreground tracking-wide uppercase">{label}</span>
       <InfoTip text={tip} />
     </div>
-    <div className="flex items-end gap-2">
-      <span className="text-3xl font-bold text-foreground leading-none tracking-tight">{value}</span>
-      {finalVal > 0 && (
-        <span className="text-[10px] font-medium text-primary mb-1 flex items-center gap-0.5">
-          <TrendingUp className="w-3 h-3" />
-          {Math.round((finalVal / (waiting + finalVal)) * 100)}% final
-        </span>
-      )}
+    <div className="flex items-end gap-2 text-primary">
+      <span className="text-3xl font-black text-foreground tabular-nums tracking-tighter leading-none">{value}</span>
+      <TrendingUp className="w-4 h-4 mb-0.5 opacity-50" />
     </div>
-    <RatioBar waiting={waiting} final={finalVal} />
   </div>
 );
 
