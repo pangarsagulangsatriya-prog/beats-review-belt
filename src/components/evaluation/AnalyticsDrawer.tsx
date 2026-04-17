@@ -1550,22 +1550,6 @@ const WeeklyView = ({ recaps }: { recaps: DailyRecap[] }) => {
 
       {selectedRecap && (
         <div className="space-y-10 pt-12 border-t border-border/40 animate-in slide-in-from-bottom-8 fade-in-0 duration-700">
-           <div className="flex items-center justify-between px-2">
-              <div className="space-y-1">
-                <h4 className="text-xs font-black text-primary uppercase tracking-widest flex items-center gap-2">
-                   <div className="w-1.5 h-1.5 rounded-full bg-primary animate-ping" />
-                   Selected Day Intelligence Detail
-                </h4>
-                <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-tight opacity-60">Full Verification Snapshot</p>
-              </div>
-              <button 
-                onClick={() => setSelectedDate("")}
-                className="group flex items-center gap-2 px-4 py-2 bg-muted/20 hover:bg-muted/40 rounded-xl border border-border/60 transition-all duration-300"
-              >
-                <span className="text-[10px] font-black text-muted-foreground group-hover:text-foreground uppercase tracking-widest">Clear Selection</span>
-                <X className="w-3.5 h-3.5 text-muted-foreground group-hover:rotate-90 transition-transform duration-300" />
-              </button>
-           </div>
            <div className="bg-card/30 rounded-[2rem] border border-border/40 p-1">
               <DailyRecapDetail recap={selectedRecap} />
            </div>
