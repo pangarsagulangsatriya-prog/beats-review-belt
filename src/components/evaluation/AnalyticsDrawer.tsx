@@ -1361,15 +1361,6 @@ const WeeklyView = ({ recaps }: { recaps: DailyRecap[] }) => {
                  </div>
               </div>
               
-              <div className="flex items-center gap-4">
-                 <div className="px-4 py-2 bg-muted/40 border border-border/60 rounded-lg text-right min-w-[120px]">
-                    <p className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.15em] mb-0.5 opacity-60">Weekly Average</p>
-                    <div className="flex items-center justify-end gap-1.5">
-                       <span className="text-xl font-black text-foreground tabular-nums tracking-tighter">114.2</span>
-                       <TrendingUp className="w-3.5 h-3.5 text-primary" />
-                    </div>
-                 </div>
-              </div>
            </div>
 
            {/* Core Chart - Precision Grid */}
