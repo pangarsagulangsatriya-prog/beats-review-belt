@@ -538,7 +538,8 @@ const LabelAnalyticsSection = ({
   data, 
   field,
   customData,
-  trendData
+  trendData,
+  progress
 }: { 
   title: string; 
   data?: HazardTask[]; 
@@ -551,6 +552,7 @@ const LabelAnalyticsSection = ({
     total: number;
   },
   trendData?: any[];
+  progress?: number;
 }) => {
   const computed = useMemo(() => {
     if (customData) return customData;
@@ -637,8 +639,27 @@ const LabelAnalyticsSection = ({
       </div>
 
       {activeTab === "overview" ? (
-        <>
-          {finalCount === 0 && tableData.length === 0 ? (
+        <div className="p-6">
+           {progress !== undefined && (
+             <div className="mb-6 flex items-center justify-between px-4 py-2 bg-muted/10 rounded-xl border border-border/30">
+                <div className="flex items-center gap-3">
+                   <div className="flex items-center gap-1.5 px-1.5 py-0.5 bg-background border border-border shadow-xs rounded-md">
+                      <span className="text-[10px] font-black text-primary italic">{Math.round(progress * 7)}/7</span>
+                      <span className="text-[7px] font-black text-muted-foreground uppercase opacity-40">Days</span>
+                   </div>
+                   <div className="h-1 w-32 bg-background rounded-full overflow-hidden border border-border/20">
+                      <div className="h-full bg-primary" style={{ width: `${progress * 100}%` }} />
+                   </div>
+                </div>
+                <div className="flex items-center gap-2">
+                   {progress < 1 && <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />}
+                   <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest opacity-50">
+                      {progress === 1 ? "Standardized Cycle" : "Dynamic Collection In-Progress"}
+                   </span>
+                </div>
+             </div>
+           )}
+           {finalCount === 0 && tableData.length === 0 ? (
             <div className="px-6 py-10 text-center">
               <p className="text-[11px] text-muted-foreground font-medium italic">Tidak ada label distribusi yang ditemukan.</p>
             </div>
@@ -693,6 +714,18 @@ const LabelAnalyticsSection = ({
                   <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                     <span className="text-3xl font-black text-foreground leading-none tracking-tighter">{total}</span>
                     <span className="text-[9px] font-bold text-muted-foreground mt-2 uppercase tracking-widest opacity-60">Total {fieldLabel}</span>
+                    {progress !== undefined && progress < 1 && (
+                      <div className="mt-2.5 px-3 py-1 bg-primary/10 rounded-full border border-primary/20 flex items-center gap-2 animate-pulse">
+                         <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                         <span className="text-[7px] font-black text-primary uppercase tracking-widest">In Progress</span>
+                      </div>
+                    )}
+                    {progress !== undefined && progress < 1 && (
+                      <div className="mt-2.5 px-3 py-1 bg-primary/10 rounded-full border border-primary/20 flex items-center gap-2 animate-pulse">
+                         <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                         <span className="text-[7px] font-black text-primary uppercase tracking-widest">In Progress</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1181,56 +1214,6 @@ const WeeklyView = ({ recaps }: { recaps: DailyRecap[] }) => {
               </button>
            </div>
 
-           <div className="h-6 w-px bg-border/40 mx-1" />
-
-           <div className="flex items-center gap-2 p-1 bg-muted/30 rounded-xl border border-border shadow-inner">
-             <button 
-               onClick={() => setActiveWeekIndex(prev => Math.min(prev + 1, weeks.length - 1))}
-               disabled={activeWeekIndex === weeks.length - 1}
-               className="p-2 rounded-lg hover:bg-card hover:shadow-xs transition-all disabled:opacity-30"
-             >
-               <ChevronLeft className="w-4 h-4" />
-             </button>
-             <div className="h-4 w-px bg-border/50 mx-1" />
-             <button 
-               onClick={() => setActiveWeekIndex(prev => Math.max(prev - 1, 0))}
-               disabled={activeWeekIndex === 0}
-               className="p-2 rounded-lg hover:bg-card hover:shadow-xs transition-all disabled:opacity-30"
-             >
-               <ChevronRight className="w-4 h-4" />
-             </button>
-           </div>
-        </div>
-      </div>
-
-       <div className="bg-muted/30 rounded-2xl p-4 px-6 border border-border/50 flex items-center gap-8 shadow-sm">
-          <div className="shrink-0 flex flex-col items-center">
-             <div className="w-12 h-12 rounded-full border-4 border-primary/10 flex items-center justify-center relative">
-                <div className="absolute inset-0 rounded-full border-4 border-primary border-t-transparent -rotate-45" style={{ clipPath: `conic-gradient(from 0deg, var(--primary) ${(currentWeek.length/7)*360}deg, transparent 0)` }} />
-                <span className="text-xs font-black text-primary">{currentWeek.length}/7</span>
-             </div>
-             <span className="text-[8px] font-black text-muted-foreground uppercase mt-1 opacity-50">Days</span>
-          </div>
-          
-          <div className="flex-1 space-y-2.5">
-             <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                   <h4 className="text-[10px] font-black text-foreground uppercase tracking-widest">Cycle TBC Progress</h4>
-                   {currentWeek.length < 7 && <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />}
-                </div>
-                <span className="text-[9px] font-black text-muted-foreground uppercase opacity-40 tracking-tighter">
-                   {currentWeek.length === 7 ? "TBC Cycle Finalized" : `Collection In Progress — ${7 - currentWeek.length} Units Remaining`}
-                </span>
-             </div>
-             <div className="h-2 w-full bg-background/50 rounded-full overflow-hidden border border-border/40 relative">
-                <div 
-                   className="h-full bg-primary transition-all duration-1000 shadow-[0_0_15px_rgba(5,122,85,0.3)] relative z-10" 
-                   style={{ width: `${(currentWeek.length / 7) * 100}%` }} 
-                />
-                <div className="absolute inset-0 bg-muted/20 repeating-linear-gradient" style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.03) 10px, rgba(0,0,0,0.03) 20px)' }} />
-             </div>
-          </div>
-       </div>
 
       {/* ── 2. Integrated Intelligence Matrix vs Trend Visualization ── */}
       {viewMode === 'matrix' ? (
@@ -1502,9 +1485,9 @@ const WeeklyView = ({ recaps }: { recaps: DailyRecap[] }) => {
           </div>
 
           <div className="space-y-12">
-             <LabelAnalyticsSection title="TBC Status" field="tbc" customData={weekAggregate.tbc} trendData={weekAggregate.tbc.trendPoints} />
-             <LabelAnalyticsSection title="GR Status" field="gr" customData={weekAggregate.gr} trendData={weekAggregate.gr.trendPoints} />
-             <LabelAnalyticsSection title="PSPP Status" field="pspp" customData={weekAggregate.pspp} trendData={weekAggregate.pspp.trendPoints} />
+             <LabelAnalyticsSection title="TBC Status" field="tbc" customData={weekAggregate.tbc} trendData={weekAggregate.tbc.trendPoints} progress={currentWeek.length / 7} />
+             <LabelAnalyticsSection title="GR Status" field="gr" customData={weekAggregate.gr} trendData={weekAggregate.gr.trendPoints} progress={currentWeek.length / 7} />
+             <LabelAnalyticsSection title="PSPP Status" field="pspp" customData={weekAggregate.pspp} trendData={weekAggregate.pspp.trendPoints} progress={currentWeek.length / 7} />
           </div>
       </div>
 
