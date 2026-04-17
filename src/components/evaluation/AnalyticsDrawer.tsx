@@ -618,14 +618,19 @@ const LabelAnalyticsSection = ({
              )}
              <div className="h-5 w-px bg-border/60" />
              <div className="flex items-center gap-3 text-[9px] font-bold uppercase tracking-tight">
-               <span className="flex items-center gap-1.5 text-muted-foreground bg-background px-2 py-0.5 rounded-full border border-border/50">
+             <div className="flex items-center gap-1.5 p-1 bg-muted/40 rounded-lg border border-border/60">
+               <div className="flex items-center gap-1.5 px-2 py-0.5 text-muted-foreground">
                  <CheckCircle2 className="w-3 h-3 text-primary" />
-                 <span className="text-foreground">{finalCount}</span> FINAL
-               </span>
-               <span className="flex items-center gap-1.5 text-muted-foreground bg-background px-2 py-0.5 rounded-full border border-border/50">
-                 <Clock className="w-3 h-3" />
-                 <span className="text-foreground">{waitingCount}</span> MENUNGGU
-               </span>
+                 <span className="text-foreground tracking-tighter tabular-nums">{finalCount}</span>
+                 <span className="opacity-40">FINAL</span>
+               </div>
+               <div className="w-px h-3 bg-border/80" />
+               <div className="flex items-center gap-1.5 px-2 py-0.5 text-muted-foreground">
+                 <Clock className="w-3 h-3 text-status-progress" />
+                 <span className="text-foreground tracking-tighter tabular-nums">{waitingCount}</span>
+                 <span className="opacity-40">MENUNGGU</span>
+               </div>
+             </div>
              </div>
           </div>
         </div>
@@ -980,8 +985,8 @@ const DailyRecapDetail = ({ recap }: { recap: DailyRecap }) => {
           customData={{
             pieData: recap.tbc.slice(0, 7).map(l => ({ name: l.name, value: l.percentage })),
             tableData: recap.tbc.map(l => ({ name: l.name, value: Math.round(recap.total * (l.percentage/100)), pct: l.percentage })),
-            finalCount: Math.round(recap.humanAnnotated * 0.7),
-            waitingCount: Math.round(recap.finalByAI * 0.3),
+            finalCount: Math.round(recap.total * 0.72),
+            waitingCount: recap.total - Math.round(recap.total * 0.72),
             total: recap.total
           }} 
         />
@@ -991,8 +996,8 @@ const DailyRecapDetail = ({ recap }: { recap: DailyRecap }) => {
           customData={{
             pieData: recap.gr.slice(0, 7).map(l => ({ name: l.name, value: l.percentage })),
             tableData: recap.gr.map(l => ({ name: l.name, value: Math.round(recap.total * (l.percentage/100)), pct: l.percentage })),
-            finalCount: Math.round(recap.humanAnnotated * 0.7),
-            waitingCount: Math.round(recap.finalByAI * 0.3),
+            finalCount: Math.round(recap.total * 0.68),
+            waitingCount: recap.total - Math.round(recap.total * 0.68),
             total: recap.total
           }} 
         />
@@ -1002,8 +1007,8 @@ const DailyRecapDetail = ({ recap }: { recap: DailyRecap }) => {
           customData={{
             pieData: recap.pspp.slice(0, 7).map(l => ({ name: l.name, value: l.percentage })),
             tableData: recap.pspp.map(l => ({ name: l.name, value: Math.round(recap.total * (l.percentage/100)), pct: l.percentage })),
-            finalCount: Math.round(recap.humanAnnotated * 0.7),
-            waitingCount: Math.round(recap.finalByAI * 0.3),
+            finalCount: Math.round(recap.total * 0.75),
+            waitingCount: recap.total - Math.round(recap.total * 0.75),
             total: recap.total
           }} 
         />
