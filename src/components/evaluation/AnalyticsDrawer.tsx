@@ -1228,6 +1228,35 @@ const WeeklyView = ({ recaps }: { recaps: DailyRecap[] }) => {
         </div>
       </div>
 
+       <div className="bg-muted/30 rounded-2xl p-4 px-6 border border-border/50 flex items-center gap-8 shadow-sm">
+          <div className="shrink-0 flex flex-col items-center">
+             <div className="w-12 h-12 rounded-full border-4 border-primary/10 flex items-center justify-center relative">
+                <div className="absolute inset-0 rounded-full border-4 border-primary border-t-transparent -rotate-45" style={{ clipPath: `conic-gradient(from 0deg, var(--primary) ${(currentWeek.length/7)*360}deg, transparent 0)` }} />
+                <span className="text-xs font-black text-primary">{currentWeek.length}/7</span>
+             </div>
+             <span className="text-[8px] font-black text-muted-foreground uppercase mt-1 opacity-50">Days</span>
+          </div>
+          
+          <div className="flex-1 space-y-2.5">
+             <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                   <h4 className="text-[10px] font-black text-foreground uppercase tracking-widest">Cycle Intelligence Progress</h4>
+                   {currentWeek.length < 7 && <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />}
+                </div>
+                <span className="text-[9px] font-black text-muted-foreground uppercase opacity-40 tracking-tighter">
+                   {currentWeek.length === 7 ? "Intelligence Cycle Finalized" : `Collection In Progress — ${7 - currentWeek.length} Units Remaining`}
+                </span>
+             </div>
+             <div className="h-2 w-full bg-background/50 rounded-full overflow-hidden border border-border/40 relative">
+                <div 
+                   className="h-full bg-primary transition-all duration-1000 shadow-[0_0_15px_rgba(5,122,85,0.3)] relative z-10" 
+                   style={{ width: `${(currentWeek.length / 7) * 100}%` }} 
+                />
+                <div className="absolute inset-0 bg-muted/20 repeating-linear-gradient" style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.03) 10px, rgba(0,0,0,0.03) 20px)' }} />
+             </div>
+          </div>
+       </div>
+
       {/* ── 2. Integrated Intelligence Matrix vs Trend Visualization ── */}
       {viewMode === 'matrix' ? (
         <div className="bg-card rounded-xl border border-border/80 shadow-sm relative overflow-hidden group/matrix transition-all duration-700 isolate">
@@ -1242,9 +1271,9 @@ const WeeklyView = ({ recaps }: { recaps: DailyRecap[] }) => {
 
                 if (!r) {
                   return (
-                    <div key={`empty-${i}`} className="flex flex-col items-center justify-center border-r border-border/40 last:border-0 bg-muted/10 opacity-30 h-[400px]">
-                      <Clock className="w-4 h-4 mb-2 text-muted-foreground" />
-                      <span className="text-[8px] font-black uppercase tracking-widest">Pending</span>
+                    <div key={`empty-${i}`} className="flex flex-col items-center justify-center border-r border-border/30 last:border-0 bg-muted/5 opacity-20 h-[400px] border-dashed">
+                      <Clock className="w-3.5 h-3.5 mb-2 text-muted-foreground opacity-50" />
+                      <span className="text-[7px] font-black uppercase tracking-widest text-muted-foreground">Pending</span>
                     </div>
                   );
                 }
