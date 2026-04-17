@@ -1170,19 +1170,19 @@ const WeeklyView = ({ recaps }: { recaps: DailyRecap[] }) => {
         <div className="flex items-center gap-4">
            <div className="flex items-center gap-1.5 p-1 bg-muted/40 rounded-xl border border-border/60">
               <button 
-                 onClick={() => setActiveWeekIndex(prev => Math.max(0, prev - 1))}
-                 disabled={activeWeekIndex === 0}
+                 onClick={() => setActiveWeekIndex(prev => Math.min(weeks.length - 1, prev + 1))}
+                 disabled={activeWeekIndex === weeks.length - 1}
                  className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-background transition-all disabled:opacity-20"
-                 title="Previous Week"
+                 title="Previous Week (Older)"
               >
                  <ChevronLeft className="w-4 h-4" />
               </button>
               <div className="w-px h-4 bg-border/60" />
               <button 
-                 onClick={() => setActiveWeekIndex(prev => Math.min(weeks.length - 1, prev + 1))}
-                 disabled={activeWeekIndex === weeks.length - 1}
+                 onClick={() => setActiveWeekIndex(prev => Math.max(0, prev - 1))}
+                 disabled={activeWeekIndex === 0}
                  className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-background transition-all disabled:opacity-20"
-                 title="Next Week"
+                 title="Next Week (Newer)"
               >
                  <ChevronRight className="w-4 h-4" />
               </button>
