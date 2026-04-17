@@ -1014,31 +1014,6 @@ const DailyRecapDetail = ({ recap }: { recap: DailyRecap }) => {
         />
       </div>
       
-      <div className="bg-card border-none rounded-2xl p-7 shadow-xl shadow-foreground/[0.02] ring-1 ring-border/50 relative overflow-hidden group hover:ring-primary/20 transition-all duration-300">
-        <div className="flex items-center gap-8 relative z-10">
-          <div className="flex-1 space-y-1.5">
-             <span className="text-[11px] font-black text-muted-foreground uppercase tracking-widest opacity-60">Total Daily Snapshots</span>
-             <p className="text-3xl font-black text-foreground tracking-tighter leading-none">{recap.total}</p>
-          </div>
-          <div className="h-12 w-px bg-border/60" />
-          <div className="flex-1 space-y-1.5">
-             <span className="text-[11px] font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2 opacity-60">
-               <UserCheck className="w-3.5 h-3.5 text-primary" /> Human Annotation
-             </span>
-             <p className="text-3xl font-black text-foreground tracking-tighter leading-none group-hover:text-primary transition-colors">{recap.humanAnnotated}</p>
-          </div>
-          <div className="h-12 w-px bg-border/60" />
-          <div className="flex-1 space-y-1.5">
-             <span className="text-[11px] font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2 opacity-60">
-               <Brain className="w-3.5 h-3.5 text-primary" /> Verified By AI
-             </span>
-             <p className="text-3xl font-black text-foreground tracking-tighter leading-none">{recap.finalByAI}</p>
-          </div>
-        </div>
-        
-        {/* Decorative corner element */}
-        <div className="absolute -top-6 -right-6 w-24 h-24 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors" />
-      </div>
     </div>
   );
 };
