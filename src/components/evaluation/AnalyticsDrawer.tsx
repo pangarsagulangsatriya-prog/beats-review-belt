@@ -1237,17 +1237,13 @@ const WeeklyView = ({ recaps }: { recaps: DailyRecap[] }) => {
                 return (
                   <div 
                     key={r.date}
-                    onClick={() => setSelectedDate(r.date)}
-                    className={cn(
-                      "flex flex-col border-r border-border last:border-0 transition-all duration-500 relative cursor-pointer group/col",
-                      isSelected ? "bg-primary/[0.04] z-10 shadow-[inset_0_0_40px_rgba(37,99,235,0.02)]" : "hover:bg-muted/40"
-                    )}
+                    className="flex flex-col border-r border-border last:border-0 transition-all duration-500 relative group/col h-full bg-background/20"
                   >
                     {/* Row 1: Header (Compact) */}
                     <div className="py-4 px-3 text-center border-b border-border/40 bg-muted/5">
                       <p className={cn(
                         "text-[10px] font-black uppercase tracking-[0.1em] transition-colors",
-                        isSelected ? "text-primary" : "text-muted-foreground/60"
+                        "text-muted-foreground/60"
                       )}>
                         {format(d!, "EEE, d", { locale: localeId })}
                       </p>
@@ -1508,13 +1504,6 @@ const WeeklyView = ({ recaps }: { recaps: DailyRecap[] }) => {
           </div>
       </div>
 
-      {selectedRecap && (
-        <div className="space-y-10 pt-12 border-t border-border/40 animate-in slide-in-from-bottom-8 fade-in-0 duration-700">
-           <div className="bg-card/30 rounded-[2rem] border border-border/40 p-1">
-              <DailyRecapDetail recap={selectedRecap} />
-           </div>
-        </div>
-      )}
     </div>
   );
 };
