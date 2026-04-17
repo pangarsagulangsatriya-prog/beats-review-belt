@@ -964,7 +964,7 @@ const DailyRecapDetail = ({ recap }: { recap: DailyRecap }) => {
           <h3 className="text-base font-black text-foreground flex items-center gap-2.5 tracking-tight uppercase">
             {format(d, "eeee, dd MMMM yyyy", { locale: localeId })}
           </h3>
-          <p className="text-[11px] text-muted-foreground mt-0.5">Summary of hazard intelligence snapshot</p>
+          <p className="text-[11px] text-muted-foreground mt-0.5">Summary of hazard TBC snapshot</p>
         </div>
         <div className="flex items-center gap-6 bg-muted/30 px-5 py-2.5 rounded-2xl border border-border/50">
            <div className="flex items-center gap-2">
@@ -1215,11 +1215,11 @@ const WeeklyView = ({ recaps }: { recaps: DailyRecap[] }) => {
           <div className="flex-1 space-y-2.5">
              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                   <h4 className="text-[10px] font-black text-foreground uppercase tracking-widest">Cycle Intelligence Progress</h4>
+                   <h4 className="text-[10px] font-black text-foreground uppercase tracking-widest">Cycle TBC Progress</h4>
                    {currentWeek.length < 7 && <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />}
                 </div>
                 <span className="text-[9px] font-black text-muted-foreground uppercase opacity-40 tracking-tighter">
-                   {currentWeek.length === 7 ? "Intelligence Cycle Finalized" : `Collection In Progress — ${7 - currentWeek.length} Units Remaining`}
+                   {currentWeek.length === 7 ? "TBC Cycle Finalized" : `Collection In Progress — ${7 - currentWeek.length} Units Remaining`}
                 </span>
              </div>
              <div className="h-2 w-full bg-background/50 rounded-full overflow-hidden border border-border/40 relative">
@@ -1344,19 +1344,19 @@ const WeeklyView = ({ recaps }: { recaps: DailyRecap[] }) => {
            {/* Chart Top Header - Flat Design */}
            <div className="p-8 pb-5 flex items-center justify-between border-b border-border/50 bg-background/50">
               <div className="space-y-1.5">
-                 <h4 className="text-[11px] font-black text-foreground uppercase tracking-[0.1em]">Intelligence Performance Trend</h4>
+                 <h4 className="text-[11px] font-black text-foreground uppercase tracking-[0.1em]">TBC Performance Trend</h4>
                  <div className="flex items-center gap-5">
                     <div className="flex items-center gap-2">
                        <span className="w-2.5 h-2.5 rounded-sm bg-[#057A55]" />
-                       <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">TBC Intelligence</span>
+                       <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">TBC</span>
                     </div>
                     <div className="flex items-center gap-2">
                        <span className="w-2.5 h-2.5 rounded-sm bg-[#10B981]" />
-                       <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">GR Intelligence</span>
+                       <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">GR</span>
                     </div>
                     <div className="flex items-center gap-2">
                        <span className="w-2.5 h-2.5 rounded-sm bg-[#34D399]" />
-                       <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">PSPP Intelligence</span>
+                       <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">PSPP</span>
                     </div>
                  </div>
               </div>
@@ -1401,20 +1401,14 @@ const WeeklyView = ({ recaps }: { recaps: DailyRecap[] }) => {
                          
                          return (
                            <div className="bg-card border border-border/80 p-0 shadow-none rounded-xl backdrop-blur-md animate-in fade-in zoom-in-95 duration-200 min-w-[240px] overflow-hidden">
-                             <div className="px-5 py-3 border-b border-border/50 bg-muted/40 flex items-center justify-between">
+                             <div className="px-5 py-3 border-b border-border/50 bg-muted/40">
                                 <p className="text-[10px] font-black uppercase tracking-widest text-foreground">{format(new Date(data.date), "EEE, d MMMM")}</p>
-                                <div className={cn(
-                                   "px-2 py-0.5 rounded text-[9px] font-black border uppercase tracking-widest",
-                                   growth >= 0 ? "bg-primary/10 text-primary border-primary/20" : "bg-red-500/10 text-red-500 border-red-500/20"
-                                )}>
-                                   {growth >= 0 ? "+" : ""}{Math.round(growth)}% Growth
-                                </div>
                              </div>
                              
                              <div className="p-5 space-y-4">
                                 <div className="flex items-center justify-between">
                                    <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest opacity-60">Throughput</span>
-                                   <span className="text-sm font-black text-foreground tabular-nums tracking-tighter">{data.total} Intel</span>
+                                   <span className="text-sm font-black text-foreground tabular-nums tracking-tighter">{data.total}</span>
                                 </div>
                                 
                                 <div className="space-y-2.5">
@@ -1517,9 +1511,9 @@ const WeeklyView = ({ recaps }: { recaps: DailyRecap[] }) => {
           </div>
 
           <div className="space-y-12">
-             <LabelAnalyticsSection title="TBC Intelligence" field="tbc" customData={weekAggregate.tbc} trendData={weekAggregate.tbc.trendPoints} />
-             <LabelAnalyticsSection title="GR Intelligence" field="gr" customData={weekAggregate.gr} trendData={weekAggregate.gr.trendPoints} />
-             <LabelAnalyticsSection title="PSPP Intelligence" field="pspp" customData={weekAggregate.pspp} trendData={weekAggregate.pspp.trendPoints} />
+             <LabelAnalyticsSection title="TBC Status" field="tbc" customData={weekAggregate.tbc} trendData={weekAggregate.tbc.trendPoints} />
+             <LabelAnalyticsSection title="GR Status" field="gr" customData={weekAggregate.gr} trendData={weekAggregate.gr.trendPoints} />
+             <LabelAnalyticsSection title="PSPP Status" field="pspp" customData={weekAggregate.pspp} trendData={weekAggregate.pspp.trendPoints} />
           </div>
       </div>
 
