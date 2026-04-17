@@ -1158,8 +1158,12 @@ const WeeklyView = ({ recaps }: { recaps: DailyRecap[] }) => {
     );
   }
 
-  const startDate = new Date(currentWeek[currentWeek.length - 1]?.date);
-  const endDate = new Date(currentWeek[0]?.date);
+  const MondayDate = startOfWeek(new Date(currentWeek[0]?.date), { weekStartsOn: 1 });
+  const SundayDate = new Date(MondayDate);
+  SundayDate.setDate(MondayDate.getDate() + 6);
+  
+  // Calculate Week Number of the Month
+  const weekNumber = Math.ceil((MondayDate.getDate() + (startOfMonth(MondayDate).getDay() || 7) - 1) / 7);
 
   return (
     <div className="space-y-10 animate-in fade-in duration-700">
@@ -1171,11 +1175,11 @@ const WeeklyView = ({ recaps }: { recaps: DailyRecap[] }) => {
           </div>
           <div>
              <h3 className="text-sm font-black text-foreground tracking-tight uppercase leading-none">
-               {format(endDate, "MMMM yyyy", { locale: localeId })} — Week {Math.ceil((activeWeekIndex + 1))}
+               {format(MondayDate, "MMMM yyyy", { locale: localeId })} — Week {weekNumber}
              </h3>
              <p className="text-[10px] text-muted-foreground mt-1.5 font-bold uppercase tracking-widest flex items-center gap-2">
                <span className="w-1 h-1 rounded-full bg-primary" />
-               {format(startDate, "dd MMM")} – {format(endDate, "dd MMM yyyy")}
+               {format(MondayDate, "dd MMM")} – {format(SundayDate, "dd MMM yyyy")}
              </p>
           </div>
         </div>
@@ -1229,7 +1233,7 @@ const WeeklyView = ({ recaps }: { recaps: DailyRecap[] }) => {
         <div className="bg-card rounded-xl border border-border/80 shadow-sm relative overflow-hidden group/matrix transition-all duration-700 isolate">
           <div className="grid grid-cols-7 h-full">
             {(() => {
-              const displayDays = [...currentWeek].reverse();
+              const displayDays = [...currentWeek]; // SEN (Mon) to MIN (Sun)
               return [...Array(7)].map((_, i) => {
                 const r = displayDays[i];
                 const d = r ? new Date(r.date) : null;
