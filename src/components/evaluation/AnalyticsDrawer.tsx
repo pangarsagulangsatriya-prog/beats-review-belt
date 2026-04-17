@@ -40,10 +40,10 @@ const PIE_COLORS = [
   "hsl(150, 40%, 65%)",      // Minty Sage
   "hsl(165, 50%, 30%)",      // Charcoal Green
   "hsl(180, 42%, 44%)",      // Cyan
-  "hsl(38, 62%, 50%)",       // Balanced Orange (Complementary)
-  "hsl(0, 52%, 52%)",        // Professional Red
-  "hsl(270, 38%, 54%)",      // Professional Purple
-  "hsl(220, 30%, 45%)",      // Muted Blue
+  "hsl(38, 62%, 50%)",       // Balanced Gold (Contextual)
+  "hsl(158, 62%, 52%)",      // Emerald Glow
+  "hsl(165, 38%, 54%)",      // Sage Dust
+  "hsl(172, 30%, 45%)",      // Petrol Green
 ];
 
 const OTHERS_COLOR = "hsl(var(--muted-foreground) / 0.3)";
@@ -1339,15 +1339,15 @@ const WeeklyView = ({ recaps }: { recaps: DailyRecap[] }) => {
                  <h4 className="text-[11px] font-black text-foreground uppercase tracking-[0.1em]">Intelligence Performance Trend</h4>
                  <div className="flex items-center gap-5">
                     <div className="flex items-center gap-2">
-                       <span className="w-2.5 h-2.5 rounded-sm bg-primary" />
+                       <span className="w-2.5 h-2.5 rounded-sm bg-[#057A55]" />
                        <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">TBC Intelligence</span>
                     </div>
                     <div className="flex items-center gap-2">
-                       <span className="w-2.5 h-2.5 rounded-sm bg-indigo-500" />
+                       <span className="w-2.5 h-2.5 rounded-sm bg-[#10B981]" />
                        <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">GR Intelligence</span>
                     </div>
                     <div className="flex items-center gap-2">
-                       <span className="w-2.5 h-2.5 rounded-sm bg-purple-500" />
+                       <span className="w-2.5 h-2.5 rounded-sm bg-[#34D399]" />
                        <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">PSPP Intelligence</span>
                     </div>
                  </div>
@@ -1411,9 +1411,9 @@ const WeeklyView = ({ recaps }: { recaps: DailyRecap[] }) => {
                                 
                                 <div className="space-y-2.5">
                                    {[
-                                     { name: 'TBC', val: Math.round(data.total * 0.45), color: '#2563eb' },
-                                     { name: 'GR', val: Math.round(data.total * 0.3), color: '#6366f1' },
-                                     { name: 'PSPP', val: Math.round(data.total * 0.25), color: '#8b5cf6' }
+                                     { name: 'TBC', val: Math.round(data.total * 0.45), color: '#057A55' },
+                                     { name: 'GR', val: Math.round(data.total * 0.3), color: '#10B981' },
+                                     { name: 'PSPP', val: Math.round(data.total * 0.25), color: '#34D399' }
                                    ].map((m, idx) => (
                                      <div key={idx} className="flex items-center justify-between text-[9px] font-black uppercase">
                                         <div className="flex items-center gap-2">
@@ -1440,28 +1440,28 @@ const WeeklyView = ({ recaps }: { recaps: DailyRecap[] }) => {
                      type="linear" 
                      dataKey={(d) => Math.round(d.total * 0.45)} 
                      name="TBC" 
-                     stroke="#2563eb" 
+                     stroke="#057A55" 
                      strokeWidth={2.5} 
-                     dot={{ r: 2.5, fill: '#2563eb', strokeWidth: 0 }}
-                     activeDot={{ r: 4, strokeWidth: 2, stroke: '#fff', fill: '#2563eb' }}
+                     dot={{ r: 2.5, fill: '#057A55', strokeWidth: 0 }}
+                     activeDot={{ r: 4, strokeWidth: 2, stroke: '#fff', fill: '#057A55' }}
                   />
                   <Line 
                      type="linear" 
                      dataKey={(d) => Math.round(d.total * 0.3)} 
                      name="GR" 
-                     stroke="#6366f1" 
+                     stroke="#10B981" 
                      strokeWidth={2.5} 
-                     dot={{ r: 2.5, fill: '#6366f1', strokeWidth: 0 }}
-                     activeDot={{ r: 4, strokeWidth: 2, stroke: '#fff', fill: '#6366f1' }}
+                     dot={{ r: 2.5, fill: '#10B981', strokeWidth: 0 }}
+                     activeDot={{ r: 4, strokeWidth: 2, stroke: '#fff', fill: '#10B981' }}
                   />
                   <Line 
                      type="linear" 
                      dataKey={(d) => Math.round(d.total * 0.2)} 
                      name="PSPP" 
-                     stroke="#8b5cf6" 
+                     stroke="#34D399" 
                      strokeWidth={2.5} 
-                     dot={{ r: 2.5, fill: '#8b5cf6', strokeWidth: 0 }}
-                     activeDot={{ r: 4, strokeWidth: 2, stroke: '#fff', fill: '#8b5cf6' }}
+                     dot={{ r: 2.5, fill: '#34D399', strokeWidth: 0 }}
+                     activeDot={{ r: 4, strokeWidth: 2, stroke: '#fff', fill: '#34D399' }}
                   />
                   
                   {/* Baseline Context - Solid Area */}
@@ -1469,14 +1469,14 @@ const WeeklyView = ({ recaps }: { recaps: DailyRecap[] }) => {
                     type="linear"
                     dataKey="total"
                     stroke="none"
-                    fill="rgba(37,99,235,0.06)"
+                    fill="rgba(5,122,85,0.06)"
                     isAnimationActive={true}
                   />
 
                   {/* Throughput - Minimalist Bars */}
                   <Bar 
                      dataKey="total" 
-                     fill="rgba(37,99,235,0.08)"
+                     fill="rgba(5,122,85,0.08)"
                      radius={[0, 0, 0, 0]} 
                      barSize={20} 
                   />
@@ -1484,37 +1484,6 @@ const WeeklyView = ({ recaps }: { recaps: DailyRecap[] }) => {
               </ResponsiveContainer>
            </div>
 
-           {/* Operational Highlights - Flat Grid Section */}
-           <div className="border-t border-border/50 bg-background/80 grid grid-cols-4 divide-x divide-border/40">
-              <div className="p-6 flex flex-col gap-1.5">
-                 <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest opacity-50">Operational Peak</p>
-                 <div className="flex items-center gap-2">
-                    <span className="text-sm font-black text-foreground tabular-nums">149 Intel</span>
-                    <span className="text-[9px] font-black text-primary uppercase">High-Volume</span>
-                 </div>
-              </div>
-              <div className="p-6 flex flex-col gap-1.5">
-                 <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest opacity-50">Trend Stabilization</p>
-                 <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-primary" />
-                    <span className="text-sm font-black text-foreground uppercase tracking-tighter">Normal Range</span>
-                 </div>
-              </div>
-              <div className="p-6 flex flex-col gap-1.5">
-                 <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest opacity-50">Capture Growth</p>
-                 <div className="flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-primary" />
-                    <span className="text-sm font-black text-foreground tabular-nums">+12.4%</span>
-                 </div>
-              </div>
-              <div className="p-6 flex flex-col gap-1.5 bg-primary/[0.03] group hover:bg-primary/[0.06] transition-colors cursor-help">
-                 <p className="text-[9px] font-black text-primary uppercase tracking-widest">Active Signal</p>
-                 <div className="flex items-center gap-2">
-                    <Activity className="w-4 h-4 text-primary" />
-                    <span className="text-sm font-black text-foreground uppercase tracking-tighter">Stable Output</span>
-                 </div>
-              </div>
-           </div>
         </div>
       )}
 
